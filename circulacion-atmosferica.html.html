@@ -1,0 +1,616 @@
+<title>Circulación Atmosférica Global</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: left control rail (buttons as a lab console) + large globe stage + explanation card below. Stacks on phones. */
+:root{
+  --bg:#e6ebf0; --surface:#f8fafc; --ink:#152230; --muted:#566576; --line:#c8d1db;
+  --ocean:#a9cdea; --ocean-deep:#5f93c2; --land:#9cc47f; --land-edge:#6f9a57; --ice:#f4f7fa;
+  --hadley:#d8731f; --ferrel:#138a7b; --polar:#3f55c9; --coriolis:#b1308c; --jet:#2a4fb8;
+  --warm:#d9372b; --cold:#2459c6; --high:#e3d65a; --cloud:#ffffff;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e141b; --surface:#16202b; --ink:#e5ecf3; --muted:#93a3b4; --line:#2b3847;
+  --ocean:#2f6189; --ocean-deep:#173a57; --land:#5e8f4c; --land-edge:#3f6a33; --ice:#d9e3ec;
+  --hadley:#f4964a; --ferrel:#38c4b0; --polar:#8597ff; --coriolis:#e86ac4; --jet:#7fa2ff;
+  --warm:#ff6a5c; --cold:#6aa0ff; --high:#d9cd4c; --cloud:#ffffff; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0e141b; --surface:#16202b; --ink:#e5ecf3; --muted:#93a3b4; --line:#2b3847;
+  --ocean:#2f6189; --ocean-deep:#173a57; --land:#5e8f4c; --land-edge:#3f6a33; --ice:#d9e3ec;
+  --hadley:#f4964a; --ferrel:#38c4b0; --polar:#8597ff; --coriolis:#e86ac4; --jet:#7fa2ff;
+  --warm:#ff6a5c; --cold:#6aa0ff; --high:#d9cd4c; --cloud:#ffffff; color-scheme:dark }
+
+html,body{height:auto}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 28px}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 20px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(1.45rem,3vw,2.1rem);letter-spacing:-.01em;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted);font-size:.92rem}
+.main{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:start}
+.rail{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.rail h2{font-family:var(--display);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:6px 2px 0}
+.rail h2:first-child{margin-top:0}
+.tog{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:14px 1fr;gap:10px;align-items:center;
+  padding:9px 11px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);transition:background .2s,border-color .2s}
+.tog b{display:block;font-weight:700;font-size:.95rem;line-height:1.2}
+.tog small{display:block;color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums}
+.tog .sw{width:14px;height:14px;border-radius:50%;border:2px solid var(--c);background:transparent;transition:background .2s}
+.tog[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--surface))}
+.tog[aria-pressed="true"] .sw{background:var(--c)}
+.tog:hover{border-color:var(--c)}
+.tog:focus-visible,.btn:focus-visible,.chk input:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--coriolis);outline-offset:2px}
+.row{display:flex;gap:8px}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;padding:8px 10px;border-radius:8px;font-weight:700;font-size:.88rem;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.chk{display:flex;align-items:center;gap:9px;font-size:.92rem;cursor:pointer;padding:2px}
+.chk input{width:17px;height:17px;accent-color:var(--coriolis);margin:0}
+.speed{display:grid;gap:2px;font-size:.88rem}
+.speed input{width:100%;accent-color:var(--coriolis)}
+.stagecol{display:grid;gap:12px;min-width:0}
+.stage{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+canvas{display:block;width:100%;touch-action:manipulation}
+.tip{position:absolute;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;
+  padding:9px 11px;font-size:.83rem;line-height:1.4;max-width:250px;box-shadow:0 6px 20px rgb(0 0 0 / .18)}
+.tip strong{font-family:var(--display);font-size:.95rem;display:block;margin-bottom:2px}
+.tip span{display:block}
+.note{position:absolute;left:12px;bottom:8px;font-size:.74rem;color:var(--muted);max-width:60%}
+.hint{position:absolute;right:12px;top:8px;font-size:.78rem;color:var(--muted);text-align:right}
+.below{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px}
+.info,.legend{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.info h3{font-family:var(--display);font-size:1.2rem;margin:0 0 6px;display:flex;align-items:center;gap:9px}
+.info h3 i{width:12px;height:12px;border-radius:50%;background:var(--c,var(--ink));flex:none}
+.info p{margin:0 0 8px;max-width:68ch}
+.info .q{margin:0;padding:8px 10px;border-radius:7px;background:var(--bg);font-size:.93rem}
+.info .q b{font-family:var(--display)}
+.legend h4{font-family:var(--display);font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 0 8px}
+.legend ul{list-style:none;margin:0;padding:0;display:grid;gap:7px;font-size:.88rem}
+.legend li{display:flex;align-items:center;gap:9px}
+.k{flex:none;width:26px;height:14px;display:grid;place-items:center;font-weight:700;font-size:.78rem;border-radius:4px}
+.k.ar{color:var(--warm)} .k.ab{color:var(--cold)}
+.k.A{background:var(--surface);border:1.5px solid var(--cold);color:var(--cold);width:20px;height:20px;border-radius:50%}
+.k.B{background:var(--surface);border:1.5px solid var(--warm);color:var(--warm);width:20px;height:20px;border-radius:50%}
+.k.cl{background:linear-gradient(var(--ocean),var(--ocean));position:relative}
+.k.cl::after{content:"";width:18px;height:7px;border-radius:5px;background:var(--cloud);box-shadow:0 0 0 1px var(--line)}
+.k.hi{background:color-mix(in srgb,var(--high) 55%,var(--ocean))}
+@media (max-width:820px){
+  .main{grid-template-columns:1fr}
+  .rail{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .rail h2{grid-column:1/-1}
+  .rail .row,.rail .chk,.rail .speed{grid-column:1/-1}
+  .below{grid-template-columns:1fr}
+  .note{max-width:90%}
+  .hint{display:none}
+}
+@media (prefers-reduced-motion:reduce){ .tog,.tog .sw{transition:none} }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Circulación atmosférica global</h1>
+    <p>Modelo tricelular · Sistemas Ambientales y Sociedades</p>
+  </header>
+
+  <div class="main">
+    <nav class="rail" aria-label="Controles del simulador">
+      <h2>Construye el modelo</h2>
+      <button class="tog" id="b-hadley" data-k="hadley" aria-pressed="true" style="--c:var(--hadley)"><span class="sw"></span><span><b>Celda de Hadley</b><small>0° – 30°</small></span></button>
+      <button class="tog" id="b-ferrel" data-k="ferrel" aria-pressed="false" style="--c:var(--ferrel)"><span class="sw"></span><span><b>Celda de Ferrel</b><small>30° – 60°</small></span></button>
+      <button class="tog" id="b-polar" data-k="polar" aria-pressed="false" style="--c:var(--polar)"><span class="sw"></span><span><b>Celda Polar</b><small>60° – 90°</small></span></button>
+      <button class="tog" id="b-coriolis" data-k="coriolis" aria-pressed="false" style="--c:var(--coriolis)"><span class="sw"></span><span><b>Efecto Coriolis</b><small>Rotación de la Tierra</small></span></button>
+      <button class="tog" id="b-jets" data-k="jets" aria-pressed="false" style="--c:var(--jet)"><span class="sw"></span><span><b>Corrientes en chorro</b><small>Vientos en altura</small></span></button>
+      <div class="row"><button class="btn" id="b-all">Ver todo</button><button class="btn" id="b-clear">Limpiar</button></div>
+      <h2>Opciones</h2>
+      <label class="chk"><input type="checkbox" id="c-labels" checked> Mostrar nombres</label>
+      <label class="chk"><input type="checkbox" id="c-spin"> Girar la Tierra</label>
+      <label class="speed" for="r-speed">Velocidad de la animación<input type="range" id="r-speed" min="0" max="2" step="0.1" value="1"></label>
+    </nav>
+
+    <div class="stagecol">
+      <div class="stage" id="stage">
+        <canvas id="sim" aria-label="Globo terrestre con las celdas de circulación atmosférica animadas"></canvas>
+        <div class="tip" id="tip" hidden></div>
+        <div class="hint">Pasa el cursor o toca el globo<br>para ver cada latitud</div>
+        <div class="note">Modelo simplificado. La altura de la atmósfera está muy exagerada: la troposfera mide solo 10–16 km.</div>
+      </div>
+      <div class="below">
+        <section class="info" id="info" aria-live="polite"></section>
+        <aside class="legend">
+          <h4>Cómo leer el simulador</h4>
+          <ul>
+            <li><span class="k ar">➜</span>Aire cálido que asciende</li>
+            <li><span class="k ab">➜</span>Aire frío que desciende</li>
+            <li><span class="k B">B</span>Baja presión: el aire sube, nubes y lluvia</li>
+            <li><span class="k A">A</span>Alta presión: el aire baja, cielo seco</li>
+            <li><span class="k cl"></span>Nubes de convergencia (ZCIT, frente polar)</li>
+            <li><span class="k hi"></span>Cinturón de altas presiones subtropicales</li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+const D = Math.PI / 180;
+const cv = document.getElementById('sim'), ctx = cv.getContext('2d');
+const stage = document.getElementById('stage'), tip = document.getElementById('tip');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Estado ---------- */
+const on = { hadley:true, ferrel:false, polar:false, coriolis:false, jets:false };
+const A = { hadley:1, ferrel:0, polar:0, coriolis:0, jets:0 };   // opacidad animada de cada capa
+let labels = true, spin = false, speed = reduce ? 0.5 : 1;
+let lon0 = -70, time = 0, hoverLat = null;
+if (reduce) document.getElementById('r-speed').value = 0.5;
+
+/* ---------- Colores desde los tokens CSS ---------- */
+let C = {};
+function readColors(){
+  const s = getComputedStyle(document.documentElement);
+  ['bg','surface','ink','muted','line','ocean','ocean-deep','land','land-edge','ice','hadley','ferrel','polar','coriolis','jet','warm','cold','high','cloud']
+    .forEach(k => C[k] = s.getPropertyValue('--'+k).trim());
+}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
+new MutationObserver(readColors).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+const hex = h => { h = h.replace('#',''); return [0,2,4].map(i => parseInt(h.substr(i,2),16)); };
+const mix = (a,b,t) => { const A1=hex(a),B1=hex(b); return `rgb(${A1.map((v,i)=>Math.round(v+(B1[i]-v)*t)).join(',')})`; };
+const rgba = (h,a) => { const c = hex(h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+
+/* ---------- Tamaño ---------- */
+let W, H, cx, cy, R, dpr;
+function resize(){
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = stage.clientWidth;
+  H = Math.round(Math.min(Math.max(W * 0.72, 340), 720));
+  cv.style.height = H + 'px';
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  R = Math.min(W / 2.62, (H - 30) / 2.55);
+  cx = W / 2; cy = H / 2 - 4;
+}
+window.addEventListener('resize', resize); resize();
+
+/* ---------- Proyección ortográfica (vista desde el ecuador) ---------- */
+function P(lat, lon){
+  const la = lat*D, dl = (lon - lon0)*D, cl = Math.cos(la);
+  return { x: cx + R*cl*Math.sin(dl), y: cy - R*Math.sin(la), z: cl*Math.cos(dl), s: Math.sin(dl) };
+}
+function Pc(lat, lon){ // proyecta y empuja al borde los puntos ocultos
+  const p = P(lat, lon);
+  if (p.z < 0){ const dy = p.y - cy; p.x = cx + Math.sign(p.s || 1)*Math.sqrt(Math.max(0, R*R - dy*dy)); }
+  return p;
+}
+const yLat = lat => cy - R*Math.sin(lat*D);
+
+/* ---------- Continentes (contornos aproximados lon, lat) ---------- */
+const LAND = [
+ [[-168,66],[-162,70],[-156,71.3],[-140,69.6],[-128,70],[-115,68],[-95,72],[-85,69],[-80,73],[-70,67],[-62,60],[-56,52],[-60,47],[-66,44],[-70,41.5],[-74,40],[-76,35],[-81,31],[-80,25.5],[-82,27],[-84,30],[-89,30],[-94,29.5],[-97,26],[-97.5,21],[-95,18.5],[-91,18.5],[-90,21],[-87,21.5],[-88,16],[-84,15],[-83.5,11],[-79.5,9],[-77.5,8.5],[-80,7.5],[-83,8.5],[-86,11],[-88,13.3],[-92,14.5],[-96,15.7],[-101,17.5],[-105,19.5],[-106,23],[-110,23],[-112.5,29],[-114.8,31.5],[-114,28],[-110,24],[-112,25],[-115,29.5],[-117,32.5],[-120.5,34.5],[-122.5,37.5],[-124,40.5],[-124.5,43],[-124,46.5],[-124.5,48.5],[-128,51],[-133,55],[-136,58],[-141,60],[-147,61],[-152,59],[-158,57],[-164,55],[-158,58.5],[-163,60],[-166,62],[-165,65]],
+ [[-77.5,8.5],[-75.5,10.5],[-72,11.8],[-71,12.3],[-68,10.5],[-63,10.7],[-60,8.5],[-57,6],[-52,5],[-50,1.5],[-48,-1],[-44,-2.5],[-40,-3],[-35,-5.5],[-35,-9],[-37.5,-12.5],[-39,-17],[-40,-20.5],[-42,-23],[-46,-24],[-48.5,-27],[-50,-31],[-53,-34],[-57,-35],[-57,-38],[-62,-39],[-65,-42],[-65,-45],[-67.5,-46.5],[-66,-48],[-69,-51],[-68.5,-53],[-70,-55],[-72,-53.5],[-74,-50],[-75.5,-46],[-73.5,-42],[-73.5,-37],[-71.5,-32],[-71.5,-28],[-70.3,-23],[-70.2,-18.5],[-75,-15.5],[-77,-12],[-79.5,-7.5],[-81,-5],[-80,-2],[-80.5,0],[-79,1.5],[-77.5,3.5],[-77.3,7]],
+ [[-55,60],[-43,60],[-40,65],[-22,70],[-20,75],[-18,80],[-30,83],[-50,82.5],[-63,81],[-70,78],[-66,76],[-58,75.5],[-55,70],[-53,66.5]],
+ [[-17,21],[-16,15],[-17,14.5],[-13,10],[-8,4.5],[-2,5],[5,6],[9,4],[10,-1],[12,-6],[13.5,-12],[11.8,-17],[14.5,-23],[17,-29],[18.5,-34.3],[22,-34],[27,-33.5],[30,-31],[33,-25.5],[35.5,-24],[35,-20],[40,-15.5],[40.5,-10],[39,-5],[41.5,-1.5],[48,5],[51,11.8],[44,11],[43,12.5],[39,15.5],[35,24],[32.5,30],[25,31.5],[20,31],[19,30.3],[15,32.5],[11,33],[10,37],[3,36.8],[-2,35.2],[-6,35.8],[-9.5,32],[-10,29],[-13,27.5],[-15,24]],
+ [[-9,37],[-8.8,43],[-1.5,43.5],[-1,46],[-4.5,48.5],[2,51],[5,53.5],[8.5,57],[10.5,59],[5,61],[5,62.5],[14,67],[20,70],[28,71],[40,67],[40,60],[30,55],[20,46],[15,44],[13,45.5],[12,44],[16,41],[18.5,40],[15.5,38],[12.5,38],[11,42.5],[8,44],[3,43],[0,39],[-0.5,38],[-2,36.7],[-5.5,36]],
+ [[-5.5,50],[1.5,51],[1.7,52.7],[-0.3,54],[-2,55.8],[-1.7,57.6],[-3,58.6],[-5,58.6],[-6.2,56.5],[-5,54.8],[-3,53.4],[-4.5,52.5],[-5.2,51.7]],
+ [[-24,64],[-22,66.3],[-16,66.5],[-13.5,65],[-18,63.4]]
+];
+const WATER = [ [[-95,59],[-92,57],[-86,55],[-82,52],[-79,54.5],[-77,60],[-78,62.5],[-85,63.5],[-90,63],[-94,61]] ];
+function polyPath(pts){
+  ctx.beginPath();
+  pts.forEach((q,i) => { const p = Pc(q[1], q[0]); i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y); });
+  ctx.closePath();
+}
+
+/* ---------- Nubes ---------- */
+function rng(seed){ return () => (seed = (seed*16807) % 2147483647) / 2147483647; }
+function makePuffs(n, seed){ const r = rng(seed); return Array.from({length:n}, () => ({ xf:r()*2.1-1.05, dy:(r()-.5)*2, rr:.6+r()*.8, v:(r()-.5)*.03 })); }
+const puffsEq = makePuffs(80, 7), puffsN60 = makePuffs(55, 19), puffsS60 = makePuffs(55, 31);
+function cloudBand(lat, spread, puffs, scale, alpha, dt){
+  if (alpha < .01) return;
+  for (const p of puffs){
+    p.xf += p.v*dt*speed; if (p.xf > 1.05) p.xf = -1.05; if (p.xf < -1.05) p.xf = 1.05;
+    const la = lat + p.dy*spread, half = R*Math.cos(la*D);
+    const x = cx + p.xf*half, y = yLat(la), r = p.rr*R*.034*scale;
+    const edge = 1 - Math.pow(Math.min(1,Math.abs(p.xf)), 6);
+    ctx.fillStyle = rgba(C.cloud, .78*alpha*edge);
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  }
+}
+
+/* ---------- Celdas (corte transversal en el borde del globo) ---------- */
+const CELLS = {
+  hadley:{ a:1,  b:30, riseLow:true  },   // sube en el ecuador, baja en 30°
+  ferrel:{ a:30, b:60, riseLow:false },   // sube en 60°, baja en 30°
+  polar: { a:60, b:88, riseLow:true  }    // sube en 60°, baja en el polo
+};
+const top = lat => R*(.085 + .13*Math.pow(Math.cos(lat*D),2));   // altura de la tropopausa (exagerada)
+const ZI = () => R*.012;
+function limb(lat, z, side){ return { x: cx + side*(R+z)*Math.cos(lat*D), y: cy - (R+z)*Math.sin(lat*D) }; }
+
+function buildLoop(cell){
+  const u0=.12,u1=.88,w0=.2,w1=.8;
+  let pts = cell.riseLow ? [[u0,w0],[u0,w1],[u1,w1],[u1,w0]] : [[u1,w0],[u1,w1],[u0,w1],[u0,w0]];
+  let line = [];
+  for (let i=0;i<4;i++){ const p=pts[i], q=pts[(i+1)%4]; for(let k=0;k<20;k++){ const t=k/20; line.push([p[0]+(q[0]-p[0])*t, p[1]+(q[1]-p[1])*t]); } }
+  for (let it=0; it<3; it++){ // suavizado de esquinas (Chaikin)
+    const n=[]; for(let i=0;i<line.length;i++){ const p=line[i], q=line[(i+1)%line.length];
+      n.push([p[0]*.75+q[0]*.25, p[1]*.75+q[1]*.25],[p[0]*.25+q[0]*.75, p[1]*.25+q[1]*.75]); } line=n; }
+  const sx = (cell.b-cell.a)*D, sy = .16, len=[0];
+  for (let i=1;i<=line.length;i++){ const p=line[i-1], q=line[i%line.length]; len.push(len[i-1]+Math.hypot((q[0]-p[0])*sx,(q[1]-p[1])*sy)); }
+  const total = len[len.length-1], M=240, out=[]; let j=0;
+  for (let k=0;k<M;k++){ const d=k/M*total; while(len[j+1]<d) j++;
+    const p=line[j], q=line[(j+1)%line.length], t=(d-len[j])/(len[j+1]-len[j]||1);
+    out.push([p[0]+(q[0]-p[0])*t, p[1]+(q[1]-p[1])*t]); }
+  cell.loop = out; cell.uRise = cell.riseLow ? u0 : u1;
+}
+Object.values(CELLS).forEach(buildLoop);
+
+function cellPt(cell, u, w, s, side){
+  const lat = cell.a + (cell.b-cell.a)*u;
+  const z = ZI() + w*(top(lat)*.93 - ZI());
+  return limb(s*lat, z, side);
+}
+function drawCell(key, alpha){
+  if (alpha < .01) return;
+  const cell = CELLS[key], col = C[key];
+  for (const s of [1,-1]) for (const side of [1,-1]){
+    // forma de la celda
+    ctx.beginPath();
+    for (let l=cell.a+.6; l<=cell.b-.6; l+=1){ const p=limb(s*l, ZI(), side); l===cell.a+.6 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y); }
+    for (let l=cell.b-.6; l>=cell.a+.6; l-=1){ const p=limb(s*l, top(l)*.96, side); ctx.lineTo(p.x,p.y); }
+    ctx.closePath();
+    ctx.fillStyle = rgba(col, .2*alpha); ctx.fill();
+    ctx.strokeStyle = rgba(col, .85*alpha); ctx.lineWidth = 1.5; ctx.stroke();
+    // trayectoria punteada
+    ctx.beginPath();
+    cell.loop.forEach((q,i)=>{ const p=cellPt(cell,q[0],q[1],s,side); i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y); });
+    ctx.closePath(); ctx.setLineDash([2,4]); ctx.strokeStyle = rgba(col,.7*alpha); ctx.lineWidth=1; ctx.stroke(); ctx.setLineDash([]);
+    // flechas que circulan
+    const N=14, M=cell.loop.length;
+    for (let i=0;i<N;i++){
+      const ph = ((i/N + time*.09) % 1 + 1) % 1, k = Math.floor(ph*M);
+      const q = cell.loop[k], q2 = cell.loop[(k+4)%M];
+      const p = cellPt(cell,q[0],q[1],s,side), p2 = cellPt(cell,q2[0],q2[1],s,side);
+      const t = Math.min(1, Math.abs(q[0]-cell.uRise)/.76);
+      arrow(p.x,p.y,p2.x,p2.y, mix(C.warm,C.cold,t), alpha, 2, 4.5, 9);
+    }
+  }
+  // nombre de la celda (lado derecho, siguiendo el borde)
+  if (labels){
+    for (const s of [1,-1]){
+      const mid = (cell.a+cell.b)/2, la = s*mid, z = top(mid)*.5 + ZI();
+      const p = limb(la, z, 1);
+      let ang = Math.atan2(-Math.cos(la*D), -Math.sin(la*D));
+      if (ang < -Math.PI/2) ang += Math.PI; else if (ang > Math.PI/2) ang -= Math.PI;  // nunca al revés
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(ang);
+      ctx.font = `700 ${Math.max(10, R*.07)}px ${getComputedStyle(document.body).getPropertyValue('--display')}`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.globalAlpha = alpha; ctx.lineWidth=3; ctx.strokeStyle=C.surface; ctx.fillStyle=col;
+      const name = key==='hadley'?'Hadley':key==='ferrel'?'Ferrel':'Polar';
+      ctx.strokeText(name,0,0); ctx.fillText(name,0,0); ctx.restore();
+    }
+  }
+}
+
+/* ---------- Flecha genérica ---------- */
+function arrow(x1,y1,x2,y2,col,alpha,lw,head,len){
+  let dx=x2-x1, dy=y2-y1; const d=Math.hypot(dx,dy)||1; dx/=d; dy/=d;
+  if (len){ x2 = x1+dx*len; y2 = y1+dy*len; }
+  ctx.globalAlpha = alpha; ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = lw; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-dx*head*.6,y2-dy*head*.6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x2-dx*head-dy*head*.6, y2-dy*head+dx*head*.6); ctx.lineTo(x2-dx*head+dy*head*.6, y2-dy*head-dx*head*.6); ctx.closePath(); ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+/* ---------- Vientos de superficie ---------- */
+function cellOf(al){ return al<30?'hadley':al<60?'ferrel':'polar'; }
+function wind(lat){ // devuelve [este, norte] unitarios aprox y magnitud
+  const al=Math.abs(lat), sg=Math.sign(lat)||1; let v, f;
+  if (al<30){ f=Math.sin(Math.PI*al/30); v=-sg; }
+  else if (al<60){ f=Math.sin(Math.PI*(al-30)/30); v=sg; }
+  else { f=Math.sin(Math.PI*(al-60)/30); v=-sg; }
+  const th = A.coriolis * 62*D * Math.min(1, al/8) * (lat>=0 ? 1 : -1); // derecha en HN, izquierda en HS
+  const e = v*Math.sin(th), n = v*Math.cos(th);
+  return [e, n, .35+.65*f];
+}
+const parts = [];
+function spawn(p){
+  const act = ['hadley','ferrel','polar'].filter(k=>on[k]);
+  if (!act.length){ p.dead=true; return; }
+  const k = act[Math.floor(Math.random()*act.length)], c = CELLS[k];
+  const s = Math.random()<.5?1:-1;
+  p.lat = s*(c.a + 1.5 + Math.random()*(Math.min(c.b,86)-c.a-3));
+  p.lon = lon0 + Math.asin(Math.random()*1.9-.95)/D;
+  p.age = 0; p.life = 2.2 + Math.random()*2.6; p.k = k; p.dead=false;
+}
+for (let i=0;i<240;i++){ const p={}; spawn(p); p.age = Math.random()*p.life; parts.push(p); }
+function stepParts(dt){
+  for (const p of parts){
+    if (p.dead || !on[p.k]){ if (Math.random()<.05) spawn(p); else { p.dead=true; } continue; }
+    const [e,n,m] = wind(p.lat), sp = 7*speed*m;
+    p.lat += n*sp*dt; p.lon += e*sp*dt/Math.max(.15,Math.cos(p.lat*D));
+    p.age += dt;
+    const c = CELLS[p.k], al=Math.abs(p.lat);
+    if (p.age>p.life || al<c.a+.5 || al>Math.min(c.b,88)) spawn(p);
+  }
+}
+function drawParts(){
+  for (const p of parts){
+    if (p.dead) continue;
+    const a0 = A[p.k]; if (a0<.02) continue;
+    const pp = P(p.lat,p.lon); if (pp.z<.05) continue;
+    const [e,n] = wind(p.lat), L=3.6;
+    const q = P(p.lat+n*L, p.lon+e*L/Math.max(.2,Math.cos(p.lat*D)));
+    const fade = Math.min(1, p.age/.5, (p.life-p.age)/.6) * Math.min(1,pp.z*3) * a0;
+    if (fade<=0) continue;
+    arrow(pp.x,pp.y,q.x,q.y, C.surface, fade*.7, 4, 6, 0);
+    arrow(pp.x,pp.y,q.x,q.y, C[p.k], fade, 2, 5, 0);
+  }
+}
+
+/* ---------- Corrientes en chorro ---------- */
+function drawJets(alpha){
+  if (alpha<.01) return;
+  const jets = [[31,2.5,5,'Chorro subtropical'],[57,5,4,'Chorro polar']];
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.clip();
+  for (const [lat0,amp,kk,name] of jets) for (const s of [1,-1]){
+    ctx.beginPath(); let first=true;
+    for (let dl=-89; dl<=89; dl+=2){
+      const lon = lon0+dl, la = s*(lat0 + amp*Math.sin(kk*lon*D + time*.4));
+      const p = P(la,lon); first ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y); first=false;
+    }
+    ctx.globalAlpha = alpha*.35; ctx.strokeStyle = C.jet; ctx.lineWidth = R*.045; ctx.lineCap='round'; ctx.stroke();
+    ctx.globalAlpha = alpha; ctx.lineWidth = 2.2; ctx.setLineDash([10,9]); ctx.lineDashOffset = -time*30*speed; ctx.strokeStyle = C.surface; ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.restore(); ctx.globalAlpha=1;
+  // marcadores en el corte transversal
+  for (const [lat0] of [[30],[60]]) for (const s of [1,-1]) for (const side of [1,-1]){
+    const p = limb(s*lat0, top(lat0)*.97, side);
+    ctx.globalAlpha = alpha; ctx.fillStyle = C.jet;
+    ctx.beginPath(); ctx.ellipse(p.x,p.y,R*.035,R*.022,-side*s*lat0*D,0,7); ctx.fill();
+    ctx.fillStyle = C.surface; ctx.beginPath(); ctx.arc(p.x,p.y,R*.008,0,7); ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  if (labels){
+    tag('Chorro subtropical', cx + R*.3, yLat(37), C.jet, alpha, 'center');
+    tag('Chorro polar', cx + R*.28, yLat(53), C.jet, alpha, 'center');
+  }
+}
+
+/* ---------- Texto con halo ---------- */
+function tag(t, x, y, col, alpha, align='center', size){
+  if (alpha<.02) return;
+  ctx.globalAlpha = alpha;
+  ctx.font = `700 ${size || Math.max(10.5, R*.064)}px "Atkinson Hyperlegible", system-ui, sans-serif`;
+  ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.lineWidth = 3.5; ctx.strokeStyle = C.surface; ctx.lineJoin='round'; ctx.strokeText(t,x,y);
+  ctx.fillStyle = col; ctx.fillText(t,x,y); ctx.globalAlpha=1;
+}
+function badge(letter, x, y, alpha){
+  if (alpha<.02) return;
+  const col = letter==='A' ? C.cold : C.warm, r = Math.max(9, R*.055);
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = C.surface; ctx.strokeStyle = col; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = col; ctx.font = `700 ${r*1.15}px "Bricolage Grotesque", system-ui, sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(letter,x,y+1);
+  ctx.globalAlpha = 1;
+}
+
+/* ---------- Dibujo principal ---------- */
+function drawGlobe(dt){
+  // océano
+  const g = ctx.createRadialGradient(cx-R*.35, cy-R*.35, R*.1, cx, cy, R);
+  g.addColorStop(0, C.ocean); g.addColorStop(1, C['ocean-deep']);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.clip();
+  // tierra
+  ctx.fillStyle = C.land; ctx.strokeStyle = C['land-edge']; ctx.lineWidth = 1;
+  LAND.forEach(pl => { polyPath(pl); ctx.fill(); ctx.stroke(); });
+  ctx.fillStyle = C.ocean; WATER.forEach(pl => { polyPath(pl); ctx.fill(); });
+  ctx.fillStyle = C.ice; ctx.fillRect(cx-R, yLat(-69), 2*R, R);
+  // cinturones de alta presión subtropical
+  const aHigh = Math.max(A.hadley, A.ferrel);
+  if (aHigh>.01){ ctx.fillStyle = rgba(C.high, .32*aHigh);
+    for (const s of [1,-1]){ const y1=yLat(s*35), y2=yLat(s*25); ctx.fillRect(cx-R, Math.min(y1,y2), 2*R, Math.abs(y2-y1)); } }
+  if (A.polar>.01){ ctx.fillStyle = rgba(C.cold, .16*A.polar); ctx.fillRect(cx-R, cy-R, 2*R, yLat(78)-(cy-R)); ctx.fillRect(cx-R, yLat(-78), 2*R, R); }
+  // líneas de referencia
+  ctx.strokeStyle = rgba(C.ink,.55); ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.moveTo(cx-R,cy); ctx.lineTo(cx+R,cy); ctx.stroke();
+  ctx.setLineDash([5,5]); ctx.strokeStyle = rgba(C.ink,.45);
+  for (const l of [23.44,-23.44]){ const h=R*Math.cos(l*D); ctx.beginPath(); ctx.moveTo(cx-h,yLat(l)); ctx.lineTo(cx+h,yLat(l)); ctx.stroke(); }
+  ctx.setLineDash([1.5,4]); ctx.strokeStyle = rgba(C.ink,.35);
+  for (const l of [30,-30,60,-60]){ const h=R*Math.cos(l*D); ctx.beginPath(); ctx.moveTo(cx-h,yLat(l)); ctx.lineTo(cx+h,yLat(l)); ctx.stroke(); }
+  ctx.setLineDash([]);
+  // nubes: ZCIT y frente polar
+  cloudBand(0, 3.2, puffsEq, 1.1, A.hadley, dt);
+  const a60 = Math.max(A.ferrel, A.polar);
+  cloudBand(60, 2.6, puffsN60, .8, a60, dt); cloudBand(-60, 2.6, puffsS60, .8, a60, dt);
+  // vientos de superficie
+  drawParts();
+  // latitud señalada
+  if (hoverLat!==null){ const h=R*Math.cos(hoverLat*D), y=yLat(hoverLat);
+    ctx.strokeStyle = C.coriolis; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(cx-h,y); ctx.lineTo(cx+h,y); ctx.stroke(); ctx.setLineDash([]); }
+  // sombreado de volumen
+  const sh = ctx.createRadialGradient(cx-R*.3, cy-R*.3, R*.4, cx, cy, R*1.02);
+  sh.addColorStop(0,'rgba(255,255,255,0.06)'); sh.addColorStop(1,'rgba(0,0,0,0.22)');
+  ctx.fillStyle = sh; ctx.fillRect(cx-R,cy-R,2*R,2*R);
+  ctx.restore();
+  ctx.strokeStyle = rgba(C.ink,.35); ctx.lineWidth=1.2; ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.stroke();
+}
+
+function cloudTower(lat, side, alpha, sc){
+  if (alpha<.01) return;
+  const r=rng(Math.round(lat*7+side*3+100));
+  for (let i=0;i<10;i++){
+    const z = R*(.02 + r()*(.85*top(Math.abs(lat))/R)), dl=(r()-.5)*5*sc;
+    const p = limb(lat+dl, z, side), rr = R*(.022+r()*.022)*sc;
+    ctx.fillStyle = rgba(C.cloud, .85*alpha); ctx.beginPath(); ctx.arc(p.x,p.y,rr,0,7); ctx.fill();
+    ctx.strokeStyle = rgba(C.ink, .12*alpha); ctx.lineWidth=1; ctx.stroke();
+  }
+}
+
+function drawSpin(alpha){
+  if (alpha<.01) return;
+  const yT = cy - R*1.2, yB = cy - R*1.02;
+  ctx.globalAlpha = alpha; ctx.strokeStyle = C.coriolis; ctx.lineWidth = 2;
+  ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(cx, yB); ctx.lineTo(cx, yT-R*.06); ctx.stroke(); ctx.setLineDash([]);
+  const rx = R*.16, ry = R*.045, yc = yT;
+  ctx.beginPath(); ctx.ellipse(cx, yc, rx, ry, 0, .15*Math.PI, 1.85*Math.PI, false); ctx.stroke();
+  // punta: la parte delantera de la elipse se mueve hacia la derecha (oeste → este)
+  const ang = .15*Math.PI, ex = cx + rx*Math.cos(ang), ey = yc + ry*Math.sin(ang);
+  ctx.fillStyle = C.coriolis; ctx.beginPath(); ctx.moveTo(ex+7,ey-1); ctx.lineTo(ex-2,ey-5); ctx.lineTo(ex-1,ey+5); ctx.closePath(); ctx.fill();
+  ctx.globalAlpha = 1;
+  if (labels) tag('La Tierra gira de oeste a este', cx + rx + 8, yc, C.coriolis, alpha, 'left');
+}
+
+function drawLabels(){
+  if (!labels) return;
+  const ink = C.ink, sz = Math.max(10, R*.058);
+  tag('Ecuador', cx - R*.78, cy - sz*.9, rgba(ink,.8), 1, 'center', sz);
+  tag('Trópico de Cáncer', cx + R*.6, yLat(23.44) - sz*.8, rgba(ink,.7), 1, 'center', sz*.9);
+  tag('Trópico de Capricornio', cx + R*.56, yLat(-23.44) + sz*.85, rgba(ink,.7), 1, 'center', sz*.9);
+  // latitudes en el borde izquierdo
+  for (const l of [30,60,-30,-60]){ const p = limb(l, -R*.06, -1); tag(Math.abs(l)+'°'+(l>0?'N':'S'), p.x, p.y, rgba(ink,.65), 1, 'center', sz*.85); }
+  tag('ZCIT', cx + R*.6, cy + sz*1.25, ink, A.hadley, 'center');
+  tag('Frente polar', cx, yLat(60), ink, Math.max(A.ferrel,A.polar), 'center', sz);
+  tag('Frente polar', cx, yLat(-60), ink, Math.max(A.ferrel,A.polar), 'center', sz);
+  const cor = A.coriolis > .5;
+  const W1 = [
+    ['hadley', 14, cor?'Alisios del NE':'Aire hacia el ecuador'],
+    ['hadley',-14, cor?'Alisios del SE':'Aire hacia el ecuador'],
+    ['ferrel', 45, cor?'Vientos del oeste':'Aire hacia el polo'],
+    ['ferrel',-45, cor?'Vientos del oeste':'Aire hacia el polo'],
+    ['polar',  71.5, cor?'Vientos polares del este':'Aire hacia los 60°'],
+    ['polar', -71.5, cor?'Vientos polares del este':'Aire hacia los 60°']
+  ];
+  for (const [k,l,t] of W1) tag(t, cx - (Math.abs(l)>40 && Math.abs(l)<50 ? R*.18 : R*.05), yLat(l), C[k], A[k], 'center', Math.abs(l)>70 ? Math.max(9.5,R*.055) : undefined);
+}
+
+function drawPressure(){
+  const xs = [-.42,.42];
+  for (const fx of xs){
+    badge('B', cx + fx*R, cy, A.hadley);
+    for (const s of [1,-1]){
+      badge('A', cx + fx*R*Math.cos(30*D)*.95, yLat(s*30), Math.max(A.hadley,A.ferrel));
+      badge('B', cx + fx*R*Math.cos(60*D)*1.25, yLat(s*60), Math.max(A.ferrel,A.polar));
+    }
+  }
+  badge('A', cx, yLat(82), A.polar); badge('A', cx, yLat(-82), A.polar);
+}
+
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(.05, (now-last)/1000); last = now;
+  time += dt*speed;
+  for (const k in A){ const t = on[k]?1:0; A[k] += (t-A[k])*Math.min(1, dt*(k==='coriolis'?1.6:4)); }
+  if (spin) lon0 -= dt*speed*8;
+  stepParts(dt);
+  ctx.clearRect(0,0,W,H);
+  drawGlobe(dt);
+  for (const side of [1,-1]){
+    cloudTower(2, side, A.hadley, 1); cloudTower(-2, side, A.hadley, 1);
+    const a60 = Math.max(A.ferrel, A.polar);
+    cloudTower(60, side, a60, .7); cloudTower(-60, side, a60, .7);
+  }
+  drawCell('hadley', A.hadley); drawCell('ferrel', A.ferrel); drawCell('polar', A.polar);
+  drawJets(A.jets);
+  drawPressure();
+  drawLabels();
+  drawSpin(A.coriolis);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- Información por latitud ---------- */
+function latInfo(lat){
+  const al = Math.abs(lat), N = lat>=0, cor = on.coriolis, hem = N?'N':'S';
+  let pres, aire, viento, clima;
+  if (al<6){ pres='Baja presión ecuatorial (ZCIT)'; aire='El aire caliente asciende'; viento='Calmas: aquí chocan los alisios de ambos hemisferios'; clima='Cálido y lluvioso todo el año · selva tropical (Amazonía, Congo)'; }
+  else if (al<25){ pres='Transición'; aire='Aire que regresa al ecuador por superficie'; viento= cor ? (N?'Alisios del NE (soplan desde el noreste)':'Alisios del SE (soplan desde el sureste)') : 'Viento directo hacia el ecuador'; clima='Tropical con estación seca y lluviosa · sabana'; }
+  else if (al<35){ pres='Alta presión subtropical'; aire='El aire seco desciende y se calienta'; viento='Vientos débiles (calmas subtropicales)'; clima='Muy seco · desiertos cálidos (Sahara, Atacama, Sonora)'; }
+  else if (al<55){ pres='Latitudes medias'; aire='Aire que va hacia el polo por superficie'; viento= cor ? (N?'Vientos del oeste (desde el suroeste)':'Vientos del oeste (desde el noroeste)') : 'Viento directo hacia el polo'; clima='Templado con 4 estaciones · bosque templado, praderas'; }
+  else if (al<65){ pres='Baja presión subpolar (frente polar)'; aire='El aire templado choca con el polar y asciende'; viento='Borrascas frecuentes'; clima='Frío, nublado y lluvioso · bosque boreal (taiga)'; }
+  else if (al<84){ pres='Zona polar'; aire='Aire frío que se desliza hacia los 60°'; viento= cor ? 'Vientos polares del este' : 'Viento directo hacia los 60°'; clima='Muy frío · tundra'; }
+  else { pres='Alta presión polar'; aire='El aire muy frío y denso desciende'; viento='Vientos débiles que salen del polo'; clima='Desierto polar · hielo permanente'; }
+  return `<strong>${Math.round(al)}° ${al<.5?'':hem} · Celda ${al<30?'de Hadley':al<60?'de Ferrel':'Polar'}</strong>
+    <span><b>Presión:</b> ${pres}</span><span><b>Aire:</b> ${aire}</span><span><b>Viento en superficie:</b> ${viento}</span><span><b>Clima:</b> ${clima}</span>`;
+}
+function pointer(e){
+  const r = cv.getBoundingClientRect(), x = e.clientX-r.left, y = e.clientY-r.top;
+  if (Math.hypot(x-cx,y-cy) > R){ hoverLat=null; tip.hidden=true; return; }
+  hoverLat = Math.asin(Math.max(-1,Math.min(1,(cy-y)/R)))/D;
+  tip.innerHTML = latInfo(hoverLat); tip.hidden = false;
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  let tx = x + 16, ty = y + 14;
+  if (tx + tw > W - 8) tx = x - tw - 16;
+  if (tx < 8) tx = 8;
+  if (ty + th > H - 8) ty = H - th - 8;
+  tip.style.left = tx+'px'; tip.style.top = ty+'px';
+}
+cv.addEventListener('pointermove', pointer);
+cv.addEventListener('pointerdown', pointer);
+cv.addEventListener('pointerleave', () => { hoverLat=null; tip.hidden=true; });
+
+/* ---------- Textos explicativos ---------- */
+const INFO = {
+  hadley:{ c:'--hadley', t:'Celda de Hadley (0° – 30°)',
+    p:'El Sol calienta más la zona del ecuador. El aire caliente pesa menos y sube: allí hay baja presión (B), se forman nubes y llueve mucho. Esa franja de nubes es la Zona de Convergencia Intertropical (ZCIT). En lo alto, el aire viaja hacia los polos, se enfría y baja cerca de los 30°, donde crea altas presiones (A). Por superficie, el aire vuelve al ecuador y cierra el círculo.',
+    q:'¿Por qué hay selvas tropicales en el ecuador y grandes desiertos, como el Sahara o Atacama, cerca de los 30°?' },
+  ferrel:{ c:'--ferrel', t:'Celda de Ferrel (30° – 60°)',
+    p:'Está entre la celda de Hadley y la Polar y gira al revés que ellas, como un engranaje movido por las otras dos. Por superficie, el aire va desde los 30° hacia los 60°. Cerca de los 60° se encuentra con el aire polar, más frío, y sube. Allí está el frente polar, con baja presión (B), borrascas y lluvias frecuentes.',
+    q:'Compara las flechas rojas y azules: ¿en qué sentido gira la celda de Ferrel respecto a la de Hadley?' },
+  polar:{ c:'--polar', t:'Celda Polar (60° – 90°)',
+    p:'Sobre los polos el aire está muy frío y es muy denso, así que baja y forma altas presiones (A). Por superficie se desliza hacia los 60°, se calienta un poco, sube en el frente polar y vuelve por arriba hacia el polo. Como el aire que baja es seco, casi no llueve.',
+    q:'La Antártida está cubierta de hielo, pero es un desierto. ¿Cómo lo explica la celda Polar?' },
+  coriolis:{ c:'--coriolis', t:'Efecto Coriolis',
+    p:'La Tierra gira de oeste a este. Por eso, el aire que se mueve sobre ella no va en línea recta: se desvía hacia la derecha en el hemisferio norte y hacia la izquierda en el hemisferio sur. Así nacen los alisios del NE y del SE, los vientos del oeste y los vientos polares del este. Si la Tierra no girara, habría una sola celda gigante en cada hemisferio, del ecuador al polo.',
+    q:'Activa y desactiva el efecto varias veces. ¿Hacia dónde se desvía el viento que va al ecuador en el hemisferio sur?' },
+  coriolisOff:{ c:'--coriolis', t:'Sin efecto Coriolis',
+    p:'Sin rotación, los vientos de superficie se mueven en línea recta de norte a sur, siguiendo solo las diferencias de presión: de las altas (A) hacia las bajas (B).',
+    q:'Mira los vientos en superficie: ¿van siempre de A hacia B? Ahora activa el efecto Coriolis y compara.' },
+  jets:{ c:'--jet', t:'Corrientes en chorro',
+    p:'En lo alto de la troposfera, a unos 10–12 km, justo en los límites entre las celdas, hay ríos de viento muy rápidos (más de 200 km/h) que circulan de oeste a este: el chorro subtropical, cerca de los 30°, y el chorro polar, cerca de los 60°. Los aviones que vuelan hacia el este los aprovechan para ahorrar combustible.',
+    q:'¿Por qué los chorros aparecen justo en los límites entre las celdas?' },
+  empty:{ c:'--muted', t:'Modelo vacío',
+    p:'Activa las celdas una a una para construir el modelo tricelular. Empieza por la celda de Hadley, sigue con Ferrel y Polar, y al final agrega el efecto Coriolis.',
+    q:'Antes de empezar: ¿dónde crees que llueve más en la Tierra, y por qué?' },
+  all:{ c:'--ink', t:'Modelo tricelular completo',
+    p:'Tres celdas en cada hemisferio reparten el calor del ecuador hacia los polos. Donde el aire sube (0° y 60°) hay baja presión, nubes y lluvia. Donde baja (30° y 90°) hay alta presión y clima seco. El efecto Coriolis desvía los vientos de superficie y forma los alisios, los vientos del oeste y los vientos polares del este.',
+    q:'Pasa el cursor por el globo desde el polo norte hasta el sur. ¿Qué patrón se repite en la presión y el clima?' }
+};
+const info = document.getElementById('info');
+function showInfo(key){
+  const d = INFO[key];
+  info.innerHTML = `<h3 style="--c:var(${d.c})"><i></i>${d.t}</h3><p>${d.p}</p><p class="q"><b>Piensa:</b> ${d.q}</p>`;
+}
+function sync(){ document.querySelectorAll('.tog').forEach(b => b.setAttribute('aria-pressed', on[b.dataset.k])); }
+document.querySelectorAll('.tog').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.k; on[k] = !on[k]; sync();
+  if (k==='coriolis') showInfo(on[k] ? 'coriolis' : 'coriolisOff');
+  else if (on[k]) showInfo(k);
+  else { const any = ['hadley','ferrel','polar','jets'].find(x=>on[x]); showInfo(any || 'empty'); }
+  if (['hadley','ferrel','polar'].includes(k) && on[k]) parts.forEach(p => { if (p.dead && Math.random()<.4) spawn(p); });
+}));
+document.getElementById('b-all').addEventListener('click', () => {
+  Object.keys(on).forEach(k => on[k]=true); sync(); showInfo('all');
+  parts.forEach(spawn);
+});
+document.getElementById('b-clear').addEventListener('click', () => {
+  Object.keys(on).forEach(k => on[k]=false); sync(); showInfo('empty');
+});
+document.getElementById('c-labels').addEventListener('change', e => labels = e.target.checked);
+document.getElementById('c-spin').addEventListener('change', e => spin = e.target.checked);
+document.getElementById('r-speed').addEventListener('input', e => speed = +e.target.value);
+showInfo('hadley');
+})();
+</script>
