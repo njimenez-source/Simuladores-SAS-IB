@@ -1,0 +1,597 @@
+<title>Laboratorio de Ozono</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: banda estratosférica a la izquierda (el experimento), tablero de mando a la derecha; debajo, reacciones y registro temporal. Diseño de un solo tema oscuro (cielo a 30 km). */
+:root {
+  --night: #0a0f24;
+  --panel: #111a3a;
+  --panel-2: #172350;
+  --ink: #e9edff;
+  --muted: #9ba7d4;
+  --line: #2a3770;
+  --uvc: #ff62cf;
+  --uvb: #a98dff;
+  --ozone: #7fd8ff;
+  --oxy: #ff5b4f;
+  --cl: #5fe08a;
+  --warn: #ffc65c;
+  --bad: #ff6b6b;
+  --good: #6fe3b0;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--night); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 22px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--uvb); }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.4vw, 50px); line-height: 1.02; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h1 em { font-style: normal; color: var(--ozone); }
+.lede { margin: 4px 0 0; max-width: 70ch; color: var(--muted); }
+h2 { font-family: var(--display); font-weight: 600; font-size: 20px; margin: 0; }
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
+@media (max-width: 920px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.stage { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #070b1c; }
+.stage canvas { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 600; max-width: 100%; cursor: crosshair; }
+.tip { position: absolute; pointer-events: none; background: rgba(10,15,36,.92); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-size: 13px; white-space: nowrap; transform: translate(-50%, -130%); }
+.tip b { font-family: var(--mono); font-weight: 500; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 14px; border-top: 1px solid var(--line); background: var(--panel); font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { flex: none; }
+.side { display: grid; gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+.du { display: grid; gap: 2px; }
+.label { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.du-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.du-num { font-family: var(--display); font-size: 46px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ozone); }
+.du-unit { font-family: var(--mono); color: var(--muted); font-size: 13px; }
+.pill { font-family: var(--mono); font-size: 12px; padding: 3px 9px; border-radius: 99px; border: 1px solid currentColor; }
+.pill.ok { color: var(--good); } .pill.low { color: var(--warn); } .pill.hole { color: var(--bad); }
+.gauge { height: 8px; border-radius: 99px; background: var(--panel-2); position: relative; overflow: hidden; }
+.gauge > i { position: absolute; inset: 0 auto 0 0; background: var(--uvb); border-radius: 99px; transition: width .4s; }
+.gauge.ozone > i { background: var(--ozone); }
+.gauge .mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--bad); }
+.meter-row { display: flex; justify-content: space-between; font-size: 13.5px; }
+.meter-row b { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.counts div { background: var(--panel-2); border-radius: 9px; padding: 7px 9px; display: grid; }
+.counts small { font-family: var(--mono); color: var(--muted); font-size: 12px; }
+.counts b { font-family: var(--mono); font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.ctl { display: grid; gap: 6px; }
+.ctl-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; }
+.ctl-top output { font-family: var(--mono); color: var(--muted); font-size: 13px; }
+input[type=range] { width: 100%; accent-color: var(--uvb); }
+#cfc { accent-color: var(--cl); }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+button { font: 500 14px var(--body); color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 8px 12px; cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--ozone); outline-offset: 2px; }
+button.primary { background: var(--good); color: #062018; border-color: transparent; font-weight: 600; }
+button.primary:disabled { opacity: .45; cursor: default; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; background: transparent; padding: 7px 11px; font-family: var(--mono); font-size: 13px; }
+.seg button[aria-pressed=true] { background: var(--panel-2); color: var(--ozone); }
+.lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 920px) { .lower { grid-template-columns: minmax(0, 1fr); } }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 400; padding: 0 6px 6px; }
+td { padding: 7px 6px; border-top: 1px solid var(--line); vertical-align: middle; }
+td.eq { font-family: var(--mono); font-size: 13.5px; white-space: nowrap; }
+td.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+td.what { color: var(--muted); font-size: 13px; }
+tr.grp td { border-top: 0; padding-top: 12px; font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; }
+tr.flash td.n { color: var(--warn); }
+.tbl { overflow-x: auto; }
+.chart-wrap canvas { width: 100%; height: 230px; display: block; }
+.chart-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.chart-key i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 920px) { .notes { grid-template-columns: minmax(0, 1fr); } }
+.notes p, .notes li { color: var(--muted); font-size: 14px; }
+.notes p { margin: 0; }
+.notes ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.notes strong { color: var(--ink); font-weight: 600; }
+.formula { font-family: var(--mono); color: var(--ink); background: var(--panel-2); border-radius: 8px; padding: 8px 10px; font-size: 13.5px; line-height: 1.7; }
+footer { color: var(--muted); font-size: 13px; }
+footer a { color: var(--ozone); }
+@media (prefers-reduced-motion: reduce) { .gauge > i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Química atmosférica · SAS NM / Física</div>
+    <h1>Laboratorio de <em>Ozono</em></h1>
+    <p class="lede">La estratosfera fabrica y destruye ozono sin parar. Ajusta la radiación del Sol, libera CFC y observa cómo el cloro rompe el equilibrio y deja pasar más radiación UV‑B hasta el suelo.</p>
+  </header>
+
+  <section class="main">
+    <div class="stage" id="stage">
+      <canvas id="sky" width="1000" height="600" aria-label="Simulación de moléculas en la estratosfera"></canvas>
+      <div class="tip" id="tip" hidden></div>
+      <div class="legend" aria-hidden="true">
+        <span><svg width="22" height="12"><circle cx="7" cy="6" r="4.5" fill="#ff5b4f"/><circle cx="15" cy="6" r="4.5" fill="#ff5b4f"/></svg>O₂ oxígeno</span>
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="4.5" fill="#ff5b4f" stroke="#ffd2cc" stroke-width="1.5"/></svg>O• átomo libre</span>
+        <span><svg width="26" height="16"><circle cx="13" cy="8" r="7.5" fill="#7fd8ff" opacity=".25"/><circle cx="6" cy="10" r="4" fill="#ff5b4f"/><circle cx="13" cy="5" r="4" fill="#ff5b4f"/><circle cx="20" cy="10" r="4" fill="#ff5b4f"/></svg>O₃ ozono</span>
+        <span><svg width="26" height="16"><circle cx="13" cy="8" r="4.5" fill="#8a93a8"/><circle cx="5" cy="5" r="3.5" fill="#5fe08a"/><circle cx="21" cy="5" r="3.5" fill="#5fe08a"/><circle cx="7" cy="13" r="3" fill="#e6f27a"/><circle cx="19" cy="13" r="3" fill="#e6f27a"/></svg>CFC (CCl₂F₂)</span>
+        <span><svg width="14" height="14"><circle cx="7" cy="7" r="5.5" fill="#5fe08a" stroke="#d7ffe4" stroke-width="1.5"/></svg>Cl•</span>
+        <span><svg width="22" height="12"><circle cx="7" cy="6" r="5" fill="#5fe08a"/><circle cx="15" cy="6" r="4.5" fill="#ff5b4f"/></svg>ClO</span>
+        <span><svg width="24" height="10"><path d="M1 5 Q4 0 7 5 T13 5 T19 5 T23 5" stroke="#ff62cf" fill="none" stroke-width="2"/></svg>UV‑C (&lt;280 nm)</span>
+        <span><svg width="24" height="10"><path d="M1 5 Q5 0 9 5 T17 5 T23 5" stroke="#a98dff" fill="none" stroke-width="2"/></svg>UV‑B (280–320 nm)</span>
+      </div>
+    </div>
+
+    <aside class="side">
+      <div class="card">
+        <div class="du">
+          <span class="label">Columna total de ozono</span>
+          <div class="du-row"><span class="du-num" id="duNum">300</span><span class="du-unit">UD (unidades Dobson)</span><span class="pill ok" id="duPill">Normal</span></div>
+        </div>
+        <div class="gauge ozone" title="El umbral de 220 UD define un agujero de ozono"><i id="duBar" style="width:60%"></i><span class="mark" style="left:44%"></span></div>
+        <div class="meter-row"><span>UV‑B que llega al suelo</span><b id="uvbPct">–</b></div>
+        <div class="gauge"><i id="uvbBar" style="width:0%"></i></div>
+        <div class="counts">
+          <div><small>O₂</small><b id="cO2">0</b></div>
+          <div><small>O•</small><b id="cO">0</b></div>
+          <div><small>O₃</small><b id="cO3">0</b></div>
+          <div><small>CFC</small><b id="cCFC">0</b></div>
+          <div><small>Cl•</small><b id="cCl">0</b></div>
+          <div><small>ClO</small><b id="cClO">0</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ctl">
+          <div class="ctl-top"><label for="uv">Intensidad de radiación UV solar</label><output id="uvOut">60 %</output></div>
+          <input type="range" id="uv" min="0" max="100" value="60">
+        </div>
+        <div class="ctl">
+          <div class="ctl-top"><label for="cfc">Emisión de CFC desde la superficie</label><output id="cfcOut">0 %</output></div>
+          <input type="range" id="cfc" min="0" max="100" value="0">
+        </div>
+        <div class="btns">
+          <button class="primary" id="montreal" disabled>Aplicar Protocolo de Montreal</button>
+        </div>
+        <div class="btns" style="justify-content:space-between;align-items:center">
+          <div class="btns">
+            <button id="play" aria-pressed="false">Pausa</button>
+            <button id="reset">Reiniciar</button>
+          </div>
+          <div class="seg" role="group" aria-label="Velocidad">
+            <button data-speed="1" aria-pressed="true">1×</button>
+            <button data-speed="3" aria-pressed="false">3×</button>
+            <button data-speed="6" aria-pressed="false">6×</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="lower">
+    <div class="card">
+      <h2>Reacciones en curso</h2>
+      <div class="tbl">
+      <table>
+        <thead><tr><th>Reacción</th><th>Qué ocurre</th><th style="text-align:right">Veces</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="3" style="color:var(--ozone)">Ciclo de Chapman (natural)</td></tr>
+          <tr id="r-photoO2"><td class="eq">O₂ + UV‑C → 2 O•</td><td class="what">Fotólisis del oxígeno (λ &lt; 240 nm)</td><td class="n">0</td></tr>
+          <tr id="r-recomb"><td class="eq">O• + O₂ → O₃</td><td class="what">Se forma ozono</td><td class="n">0</td></tr>
+          <tr id="r-photoO3"><td class="eq">O₃ + UV‑B → O₂ + O•</td><td class="what">El ozono absorbe UV‑B (λ &gt; 240 nm)</td><td class="n">0</td></tr>
+          <tr id="r-lossOO3"><td class="eq">O• + O₃ → 2 O₂</td><td class="what">Pérdida natural, lenta</td><td class="n">0</td></tr>
+          <tr class="grp"><td colspan="3" style="color:var(--cl)">Destrucción por cloro</td></tr>
+          <tr id="r-photoCFC"><td class="eq">CCl₂F₂ + UV‑C → Cl• + CClF₂•</td><td class="what">La UV libera cloro del CFC</td><td class="n">0</td></tr>
+          <tr id="r-clO3"><td class="eq">Cl• + O₃ → ClO + O₂</td><td class="what">El cloro destruye ozono</td><td class="n">0</td></tr>
+          <tr id="r-cloO"><td class="eq">ClO + O• → Cl• + O₂</td><td class="what">El cloro se regenera (catalizador)</td><td class="n">0</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="card chart-wrap">
+      <h2>Registro en el tiempo</h2>
+      <div class="chart-key">
+        <span><i style="background:var(--ozone)"></i>Ozono (UD)</span>
+        <span><i style="background:var(--uvb)"></i>UV‑B en el suelo (%)</span>
+        <span><i style="background:var(--cl)"></i>Cl• + ClO</span>
+      </div>
+      <canvas id="chart" aria-label="Gráfico de ozono y UV-B a lo largo del tiempo"></canvas>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div class="card">
+      <h2>Lo que estás viendo</h2>
+      <p>Cada fotón UV que baja del Sol puede ser absorbido. La <strong>UV‑C</strong> rompe moléculas de O₂ en lo alto; los átomos libres se unen a otro O₂ y forman <strong>O₃</strong>. El ozono absorbe la <strong>UV‑B</strong>, se rompe y vuelve a formarse. Producción y destrucción se equilibran, y la mayor parte de la UV dañina nunca llega al suelo.</p>
+    </div>
+    <div class="card">
+      <h2>Por qué el cloro es tan dañino</h2>
+      <div class="formula">Cl• + O₃ → ClO + O₂<br>ClO + O• → Cl• + O₂<br>────────────────<br>Neto: O₃ + O• → 2 O₂</div>
+      <p>El cloro sale intacto de cada vuelta, así que actúa como <strong>catalizador</strong>. En la atmósfera real un solo átomo de cloro puede destruir del orden de 100 000 moléculas de ozono antes de quedar atrapado como HCl o ClONO₂.</p>
+    </div>
+    <div class="card">
+      <h2>Preguntas para investigar</h2>
+      <ol>
+        <li>Con CFC en 0 %, sube y baja la radiación UV. ¿Cambia mucho la columna de ozono? Explica por qué con el ciclo de Chapman.</li>
+        <li>Pon la emisión de CFC al 100 % durante un minuto. ¿Cuánto tarda en bajar de 220 UD?</li>
+        <li>Aplica el Protocolo de Montreal. ¿Por qué el ozono no se recupera de inmediato?</li>
+        <li>¿Qué relación observas en el gráfico entre el ozono y la UV‑B que llega al suelo? Relaciónalo con riesgos para la salud y los ecosistemas.</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>Modelo simplificado con fines didácticos: las cantidades de moléculas y la escala en UD son ilustrativas. Inspirado en el recurso <a href="https://www.edumedia.com/es/media/946-capa-de-ozono" target="_blank" rel="noopener">Capa de ozono de EduMedia</a>.</footer>
+</div>
+
+<script>
+// ===== Motor de la simulación (sin dependencias de dibujo) =====
+function createSim(rng) {
+  rng = rng || Math.random;
+  const W = 1000, H = 600;
+  const TOP = 18, STRAT_BOT = 470, GROUND = 572;
+  const CELL = 14, COLS = Math.ceil(W / CELL), ROWS = Math.ceil(H / CELL);
+  const P = {
+    uvcFrac: 0.38, photonSpeed: 5.2,
+    rAbs: 9, pO2: 0.45, pO3: 0.7, pCFC: 0.55,
+    rRx: 10, pO_O2: 0.35, pO_O3: 0.015, pO_O: 0.3,
+    pCl_O3: 0.55, pClO_O: 0.6, clLife: 1 / 5400,
+  };
+  const S = {
+    W, H, TOP, STRAT_BOT, GROUND, P,
+    step: 0, uv: 0.6, cfc: 0, nextId: 1,
+    mols: [], photons: [], fx: [], surf: [], sent: [], marks: [],
+    rx: { photoO2: 0, recomb: 0, photoO3: 0, lossOO3: 0, photoCFC: 0, clO3: 0, cloO: 0 },
+    emitted: 0,
+  };
+  const rnd = (a, b) => a + rng() * (b - a);
+  function add(kind, x, y) {
+    const m = { id: S.nextId++, kind, x, y, vx: rnd(-0.5, 0.5), vy: rnd(-0.5, 0.5), a: rnd(0, 6.28), va: rnd(-0.03, 0.03), dead: false, age: 0 };
+    S.mols.push(m); return m;
+  }
+  S.add = add;
+  function reset() {
+    S.step = 0; S.mols = []; S.photons = []; S.fx = []; S.surf = []; S.sent = []; S.marks = []; S.emitted = 0;
+    for (const k in S.rx) S.rx[k] = 0;
+    for (let i = 0; i < 270; i++) add('O2', rnd(10, W - 10), rnd(TOP + 5, STRAT_BOT - 5));
+  }
+  S.reset = reset;
+  let grid = [];
+  function buildGrid() {
+    grid = new Array(COLS * ROWS);
+    for (const m of S.mols) {
+      if (m.dead) continue;
+      const c = Math.min(COLS - 1, Math.max(0, (m.x / CELL) | 0)), r = Math.min(ROWS - 1, Math.max(0, (m.y / CELL) | 0));
+      const k = r * COLS + c; (grid[k] || (grid[k] = [])).push(m);
+    }
+  }
+  function near(x, y, rad, kinds, self) {
+    const c0 = Math.max(0, ((x - rad) / CELL) | 0), c1 = Math.min(COLS - 1, ((x + rad) / CELL) | 0);
+    const r0 = Math.max(0, ((y - rad) / CELL) | 0), r1 = Math.min(ROWS - 1, ((y + rad) / CELL) | 0);
+    let best = null, bd = rad * rad;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+      const b = grid[r * COLS + c]; if (!b) continue;
+      for (const m of b) {
+        if (m.dead || m === self || kinds.indexOf(m.kind) < 0) continue;
+        const d = (m.x - x) ** 2 + (m.y - y) ** 2;
+        if (d < bd) { bd = d; best = m; }
+      }
+    }
+    return best;
+  }
+  function flash(x, y, type) { S.fx.push({ x, y, type, life: 1 }); }
+  function split(m, k1, k2) {
+    m.dead = true;
+    const a = add(k1, m.x - 3, m.y), b = add(k2, m.x + 3, m.y);
+    a.vx = -rnd(0.6, 1.2); b.vx = rnd(0.6, 1.2); a.vy = rnd(-0.6, 0.6); b.vy = rnd(-0.6, 0.6);
+    return [a, b];
+  }
+  function stepOnce() {
+    S.step++;
+    // fotones
+    const rate = S.uv * 0.55;
+    let n = rate; while (n > 0) { if (rng() < Math.min(1, n)) { const band = rng() < P.uvcFrac ? 'C' : 'B'; S.photons.push({ x: rnd(0, W), y: -10, band, vx: rnd(-0.4, 0.4), ph: rnd(0, 6.28) }); S.sent.push({ s: S.step, band }); } n -= 1; }
+    // CFC emitidos desde superficie
+    if (S.cfc > 0 && rng() < S.cfc * 0.035) { const m = add('CFC', rnd(20, W - 20), GROUND + 6); m.vy = -0.55; S.emitted++; }
+    // movimiento
+    for (const m of S.mols) {
+      if (m.dead) continue;
+      m.age++; m.a += m.va;
+      if (m.kind === 'R') { m.y -= 0.2; if (m.age > 140) m.dead = true; continue; }
+      m.vx += (rng() - 0.5) * 0.22; m.vy += (rng() - 0.5) * 0.22;
+      if (m.kind === 'CFC') m.vy -= m.y > STRAT_BOT ? 0.02 : 0.004;
+      m.vx *= 0.97; m.vy *= 0.97;
+      const sp = Math.hypot(m.vx, m.vy), mx = m.kind === 'O' || m.kind === 'Cl' ? 1.3 : 0.9;
+      if (sp > mx) { m.vx *= mx / sp; m.vy *= mx / sp; }
+      m.x += m.vx; m.y += m.vy;
+      if (m.x < 6) { m.x = 6; m.vx = Math.abs(m.vx); } if (m.x > W - 6) { m.x = W - 6; m.vx = -Math.abs(m.vx); }
+      const bot = (m.kind === 'CFC' && m.y > STRAT_BOT - 4) ? GROUND + 8 : STRAT_BOT;
+      if (m.y < TOP) { m.y = TOP; m.vy = Math.abs(m.vy); } if (m.y > bot) { m.y = bot; m.vy = -Math.abs(m.vy); }
+      if ((m.kind === 'Cl' || m.kind === 'ClO') && rng() < P.clLife) { m.dead = true; if (m.kind === 'ClO') add('O', m.x, m.y); }
+    }
+    buildGrid();
+    // absorción de fotones
+    for (const p of S.photons) {
+      if (p.dead) continue;
+      p.y += P.photonSpeed; p.x += p.vx; p.ph += 0.5;
+      if (p.y > GROUND) { p.dead = true; S.surf.push({ s: S.step, band: p.band }); flash(p.x, GROUND, 'hit' + p.band); continue; }
+      if (p.y < TOP || p.y > STRAT_BOT + 6) continue;
+      const kinds = p.band === 'C' ? ['O2', 'CFC'] : ['O3'];
+      const m = near(p.x, p.y, p.band === 'C' ? P.rAbs : P.rAbs + 3, kinds);
+      if (!m) continue;
+      if (m.kind === 'O2' && rng() < P.pO2) { split(m, 'O', 'O'); p.dead = true; S.rx.photoO2++; flash(m.x, m.y, 'C'); }
+      else if (m.kind === 'CFC' && rng() < P.pCFC) { const [a, b] = split(m, 'Cl', 'R'); p.dead = true; S.rx.photoCFC++; flash(m.x, m.y, 'C'); }
+      else if (m.kind === 'O3' && rng() < P.pO3) { split(m, 'O2', 'O'); p.dead = true; S.rx.photoO3++; flash(m.x, m.y, 'B'); }
+    }
+    S.photons = S.photons.filter(p => !p.dead);
+    // reacciones químicas
+    for (const m of S.mols.slice()) {
+      if (m.dead) continue;
+      if (m.kind === 'O') {
+        const o = near(m.x, m.y, P.rRx, ['O2', 'O3', 'O', 'ClO'], m);
+        if (!o) continue;
+        if (o.kind === 'O2' && rng() < P.pO_O2) { m.dead = o.dead = true; const z = add('O3', (m.x + o.x) / 2, (m.y + o.y) / 2); z.vx = o.vx; z.vy = o.vy; S.rx.recomb++; flash(z.x, z.y, 'make'); }
+        else if (o.kind === 'O3' && rng() < P.pO_O3) { m.dead = o.dead = true; add('O2', m.x, m.y); add('O2', o.x, o.y); S.rx.lossOO3++; }
+        else if (o.kind === 'O' && rng() < P.pO_O) { m.dead = o.dead = true; add('O2', (m.x + o.x) / 2, (m.y + o.y) / 2); }
+        else if (o.kind === 'ClO' && rng() < P.pClO_O) { m.dead = o.dead = true; add('Cl', o.x, o.y); add('O2', m.x, m.y); S.rx.cloO++; flash(o.x, o.y, 'cl'); }
+      } else if (m.kind === 'Cl') {
+        const o = near(m.x, m.y, P.rRx, ['O3'], m);
+        if (o && rng() < P.pCl_O3) { m.dead = o.dead = true; add('ClO', m.x, m.y); add('O2', o.x, o.y); S.rx.clO3++; flash(o.x, o.y, 'cl'); }
+      }
+    }
+    if (S.step % 120 === 0) S.mols = S.mols.filter(m => !m.dead);
+    for (const f of S.fx) f.life -= 0.04; S.fx = S.fx.filter(f => f.life > 0);
+    const cut = S.step - 300; while (S.surf.length && S.surf[0].s < cut) S.surf.shift();
+    while (S.sent.length && S.sent[0].s < cut - 100) S.sent.shift();
+  }
+  S.stepOnce = stepOnce;
+  S.count = function () {
+    const c = { O2: 0, O: 0, O3: 0, CFC: 0, Cl: 0, ClO: 0 };
+    for (const m of S.mols) if (!m.dead && c[m.kind] !== undefined) c[m.kind]++;
+    return c;
+  };
+  S.surfRate = function () { let b = 0, cc = 0; for (const h of S.surf) h.band === 'B' ? b++ : cc++; let sb = 0, sc = 0; for (const h of S.sent) { if (h.s > S.step - 400 && h.s <= S.step - 100) h.band === 'B' ? sb++ : sc++; } return { B: b, C: cc, sentB: sb, sentC: sc }; };
+  reset();
+  return S;
+}
+
+
+
+(function () {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const S = createSim();
+  const cv = document.getElementById('sky'), ctx = cv.getContext('2d');
+  const ch = document.getElementById('chart'), cx = ch.getContext('2d');
+  const C = { oxy: '#ff5b4f', ozone: '#7fd8ff', cl: '#5fe08a', f: '#e6f27a', c: '#8a93a8', uvc: '#ff62cf', uvb: '#a98dff', ink: '#e9edff', muted: '#9ba7d4', line: '#2a3770' };
+  const DU_PER = 3.7;
+  let speed = 1, running = true, duEMA = 0, uvbEMA = null, hist = [], marks = [], lastRx = {};
+  let cfcWasOn = false;
+
+  // ---- tamaño del canvas a la resolución de pantalla
+  function fit() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = cv.clientWidth || 1000;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(w * 0.6 * dpr);
+    const cw = ch.clientWidth || 500;
+    ch.width = Math.round(cw * dpr); ch.height = Math.round(230 * dpr);
+  }
+  window.addEventListener('resize', fit); fit();
+
+  // ---- altitud
+  function yOfKm(km) {
+    if (km >= 10) return S.TOP + (50 - km) / 40 * (S.STRAT_BOT - S.TOP);
+    return S.STRAT_BOT + (10 - km) / 10 * (S.GROUND - S.STRAT_BOT);
+  }
+
+  function drawBackground() {
+    const g = ctx.createLinearGradient(0, 0, 0, S.H);
+    g.addColorStop(0, '#05081a'); g.addColorStop(0.35, '#0d1640'); g.addColorStop(0.78, '#1a2f6e'); g.addColorStop(0.95, '#3b6aa8');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, S.W, S.H);
+    // brillo del Sol
+    const sg = ctx.createRadialGradient(820, -60, 10, 820, -60, 260);
+    sg.addColorStop(0, 'rgba(255,220,150,.55)'); sg.addColorStop(1, 'rgba(255,220,150,0)');
+    ctx.fillStyle = sg; ctx.fillRect(0, 0, S.W, 260);
+    // banda donde está la capa de ozono (20–35 km)
+    const y1 = yOfKm(35), y2 = yOfKm(20);
+    ctx.fillStyle = 'rgba(127,216,255,.06)'; ctx.fillRect(0, y1, S.W, y2 - y1);
+    // tropopausa
+    ctx.strokeStyle = 'rgba(155,167,212,.35)'; ctx.setLineDash([6, 6]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, S.STRAT_BOT + 8); ctx.lineTo(S.W, S.STRAT_BOT + 8); ctx.stroke(); ctx.setLineDash([]);
+    // suelo
+    const gg = ctx.createLinearGradient(0, S.GROUND, 0, S.H);
+    gg.addColorStop(0, '#2f6b4a'); gg.addColorStop(1, '#1d4430');
+    ctx.fillStyle = gg; ctx.fillRect(0, S.GROUND, S.W, S.H - S.GROUND);
+    // escala de altitud
+    ctx.font = '500 12px "IBM Plex Mono", monospace'; ctx.textBaseline = 'middle';
+    for (const km of [50, 40, 30, 20, 10, 0]) {
+      const y = km === 0 ? S.GROUND : yOfKm(km);
+      ctx.fillStyle = 'rgba(233,237,255,.55)'; ctx.fillRect(0, y, 8, 1);
+      ctx.fillText(km + ' km', 12, Math.max(10, Math.min(S.H - 10, y)));
+    }
+    ctx.font = '600 12px "IBM Plex Mono", monospace'; ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(233,237,255,.5)';
+    ctx.fillText('ESTRATOSFERA', S.W - 12, yOfKm(46));
+    ctx.fillStyle = 'rgba(127,216,255,.7)'; ctx.fillText('capa de ozono', S.W - 12, (y1 + y2) / 2);
+    ctx.fillStyle = 'rgba(233,237,255,.5)'; ctx.fillText('TROPOSFERA', S.W - 12, yOfKm(5));
+    ctx.fillStyle = 'rgba(233,237,255,.8)'; ctx.fillText('SUPERFICIE', S.W - 12, (S.GROUND + S.H) / 2 + 1);
+    ctx.textAlign = 'left';
+  }
+
+  function atom(x, y, r, col, ring) {
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fillStyle = col; ctx.fill();
+    if (ring) { ctx.lineWidth = 1.4; ctx.strokeStyle = ring; ctx.stroke(); }
+  }
+  function drawMol(m) {
+    const x = m.x, y = m.y, a = m.a, c = Math.cos(a), s = Math.sin(a);
+    switch (m.kind) {
+      case 'O2': atom(x - c * 3.6, y - s * 3.6, 4.2, C.oxy); atom(x + c * 3.6, y + s * 3.6, 4.2, C.oxy); break;
+      case 'O': atom(x, y, 4.2, C.oxy, '#ffd2cc'); break;
+      case 'O3': {
+        ctx.beginPath(); ctx.arc(x, y, 11, 0, 6.2832); ctx.fillStyle = 'rgba(127,216,255,.22)'; ctx.fill();
+        for (const k of [-1, 0, 1]) { const ang = a + k * 1.05; const d = k === 0 ? 0 : 6.6; atom(x + Math.cos(ang) * d + (k === 0 ? -Math.sin(a) * 3.5 : 0), y + Math.sin(ang) * d + (k === 0 ? Math.cos(a) * 3.5 : 0), 3.9, C.oxy); }
+        break;
+      }
+      case 'CFC': {
+        for (let k = 0; k < 4; k++) { const ang = a + k * 1.5708; atom(x + Math.cos(ang) * 6.5, y + Math.sin(ang) * 6.5, k < 2 ? 3.8 : 3.1, k < 2 ? C.cl : C.f); }
+        atom(x, y, 4.4, C.c); break;
+      }
+      case 'Cl': atom(x, y, 5.4, C.cl, '#d7ffe4'); break;
+      case 'ClO': atom(x - c * 3.8, y - s * 3.8, 5, C.cl); atom(x + c * 4, y + s * 4, 4.2, C.oxy); break;
+      case 'R': { ctx.globalAlpha = Math.max(0, 1 - m.age / 140) * 0.6; atom(x, y, 4, C.c); atom(x + 6, y - 3, 3, C.f); atom(x - 6, y - 3, 3, C.cl); ctx.globalAlpha = 1; break; }
+    }
+  }
+  function drawPhoton(p) {
+    ctx.strokeStyle = p.band === 'C' ? C.uvc : C.uvb; ctx.lineWidth = 2;
+    const len = 26, waves = p.band === 'C' ? 3.5 : 2.5, amp = 3.2;
+    ctx.beginPath();
+    for (let i = 0; i <= 18; i++) {
+      const t = i / 18, yy = p.y - len * (1 - t), xx = p.x - p.vx * len / 5.2 * (1 - t) + Math.sin(t * waves * 6.2832 + (reduced ? 0 : p.ph)) * amp;
+      i ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy);
+    }
+    ctx.stroke();
+  }
+  function drawFx(f) {
+    const r = (1 - f.life) * 22 + 4;
+    let col = f.type === 'C' || f.type === 'hitC' ? '255,98,207' : f.type === 'B' || f.type === 'hitB' ? '169,141,255' : f.type === 'cl' ? '95,224,138' : '127,216,255';
+    ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, 6.2832); ctx.strokeStyle = 'rgba(' + col + ',' + (f.life * 0.8).toFixed(2) + ')'; ctx.lineWidth = f.type.startsWith('hit') ? 2.5 : 1.5; ctx.stroke();
+  }
+
+  function render() {
+    const k = cv.width / S.W;
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    drawBackground();
+    for (const m of S.mols) if (!m.dead) drawMol(m);
+    for (const p of S.photons) drawPhoton(p);
+    if (!reduced) for (const f of S.fx) drawFx(f);
+    if (!running) {
+      ctx.fillStyle = 'rgba(10,15,36,.6)'; ctx.fillRect(S.W / 2 - 70, 14, 140, 30);
+      ctx.fillStyle = C.ink; ctx.font = '600 14px "IBM Plex Sans", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('En pausa', S.W / 2, 30); ctx.textAlign = 'left';
+    }
+  }
+
+  // ---- panel de lectura
+  const $ = id => document.getElementById(id);
+  function readouts() {
+    const c = S.count();
+    duEMA = duEMA ? duEMA * 0.97 + c.O3 * DU_PER * 0.03 : c.O3 * DU_PER;
+    const du = Math.round(duEMA);
+    $('duNum').textContent = du;
+    const pill = $('duPill');
+    if (du < 220) { pill.className = 'pill hole'; pill.textContent = 'Agujero de ozono'; }
+    else if (du < 270) { pill.className = 'pill low'; pill.textContent = 'Bajo'; }
+    else { pill.className = 'pill ok'; pill.textContent = 'Normal'; }
+    $('duBar').style.width = Math.min(100, du / 500 * 100) + '%';
+    const sr = S.surfRate();
+    if (sr.sentB > 8) {
+      const pct = 100 * sr.B / sr.sentB;
+      uvbEMA = uvbEMA == null ? pct : uvbEMA * 0.95 + pct * 0.05;
+    } else if (S.uv === 0) uvbEMA = uvbEMA == null ? 0 : uvbEMA * 0.95;
+    const u = uvbEMA == null ? null : Math.max(0, Math.min(100, uvbEMA));
+    $('uvbPct').textContent = u == null ? '–' : Math.round(u) + ' %';
+    $('uvbBar').style.width = (u || 0) + '%';
+    for (const k of ['O2', 'O', 'O3', 'CFC', 'Cl', 'ClO']) $('c' + k).textContent = c[k];
+    for (const key in S.rx) {
+      const row = $('r-' + key); if (!row) continue;
+      if (lastRx[key] !== S.rx[key]) {
+        row.querySelector('.n').textContent = S.rx[key].toLocaleString('es');
+        if (lastRx[key] !== undefined) { row.classList.add('flash'); clearTimeout(row._t); row._t = setTimeout(() => row.classList.remove('flash'), 350); }
+        lastRx[key] = S.rx[key];
+      }
+    }
+    return { du, u, cl: c.Cl + c.ClO };
+  }
+
+  // ---- gráfico
+  function drawChart() {
+    const dpr = ch.width / (ch.clientWidth || 1), w = ch.clientWidth, h = 230;
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.clearRect(0, 0, w, h);
+    const L = 40, R = 40, T = 10, B = 26, pw = w - L - R, ph = h - T - B, N = 360;
+    cx.font = '11px "IBM Plex Mono", monospace'; cx.textBaseline = 'middle';
+    for (const v of [0, 100, 200, 300, 400]) {
+      const y = T + ph - v / 400 * ph;
+      cx.strokeStyle = 'rgba(42,55,112,.8)'; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(L, y); cx.lineTo(L + pw, y); cx.stroke();
+      cx.fillStyle = C.ozone; cx.textAlign = 'right'; cx.fillText(v, L - 6, y);
+      cx.fillStyle = C.uvb; cx.textAlign = 'left'; cx.fillText((v / 4) + '%', L + pw + 6, y);
+    }
+    // umbral 220 UD
+    const yh = T + ph - 220 / 400 * ph;
+    cx.strokeStyle = 'rgba(255,107,107,.7)'; cx.setLineDash([4, 4]); cx.beginPath(); cx.moveTo(L, yh); cx.lineTo(L + pw, yh); cx.stroke(); cx.setLineDash([]);
+    cx.fillStyle = 'rgba(255,107,107,.9)'; cx.textAlign = 'left'; cx.fillText('220 UD', L + 4, yh - 8);
+    cx.fillStyle = C.muted; cx.textAlign = 'center'; cx.fillText('tiempo →', L + pw / 2, h - 9);
+    if (!hist.length) return;
+    const x0 = hist.length < N ? 0 : hist.length - N, xs = i => L + (i - x0) / (N - 1) * pw;
+    for (const m of marks) {
+      if (m.i < x0) continue;
+      const x = xs(m.i);
+      cx.strokeStyle = m.col; cx.globalAlpha = .7; cx.beginPath(); cx.moveTo(x, T); cx.lineTo(x, T + ph); cx.stroke(); cx.globalAlpha = 1;
+      cx.fillStyle = m.col; cx.textAlign = x > L + pw - 80 ? 'right' : 'left'; cx.fillText(m.t, x + (cx.textAlign === 'right' ? -4 : 4), T + 8);
+    }
+    const line = (get, col, max) => {
+      cx.strokeStyle = col; cx.lineWidth = 2; cx.beginPath(); let started = false;
+      for (let i = x0; i < hist.length; i++) { const v = get(hist[i]); if (v == null) { started = false; continue; } const y = T + ph - Math.min(1, v / max) * ph; started ? cx.lineTo(xs(i), y) : cx.moveTo(xs(i), y); started = true; }
+      cx.stroke();
+    };
+    line(d => d.cl, C.cl, 150);
+    line(d => d.u, C.uvb, 100);
+    line(d => d.du, C.ozone, 400);
+  }
+
+  // ---- bucle
+  let acc = 0, frame = 0, last = performance.now();
+  function loop(now) {
+    const dt = Math.min(100, now - last); last = now;
+    if (running) {
+      acc += dt / (1000 / 60) * speed;
+      let n = 0; while (acc >= 1 && n < 30) { S.stepOnce(); acc -= 1; n++; if (S.step % 30 === 0) { const r = readouts(); hist.push(r); if (hist.length > 2000) { hist.shift(); marks.forEach(m => m.i--); marks = marks.filter(m => m.i >= 0); } } }
+      if (n === 30) acc = 0;
+    }
+    render();
+    if (++frame % 6 === 0) drawChart();
+    requestAnimationFrame(loop);
+  }
+
+  // ---- controles
+  const uv = $('uv'), cfc = $('cfc'), mont = $('montreal');
+  function mark(t, col) { marks.push({ i: hist.length, t, col }); }
+  uv.addEventListener('input', () => { S.uv = uv.value / 100; $('uvOut').textContent = uv.value + ' %'; });
+  cfc.addEventListener('input', () => {
+    S.cfc = cfc.value / 100; $('cfcOut').textContent = cfc.value + ' %';
+    mont.disabled = S.cfc === 0;
+    if (S.cfc > 0 && !cfcWasOn) mark('CFC', C.cl);
+    cfcWasOn = S.cfc > 0;
+  });
+  mont.addEventListener('click', () => {
+    S.cfc = 0; cfc.value = 0; $('cfcOut').textContent = '0 %'; mont.disabled = true; cfcWasOn = false;
+    mark('Montreal', C.ink);
+  });
+  $('play').addEventListener('click', e => { running = !running; e.currentTarget.textContent = running ? 'Pausa' : 'Reanudar'; e.currentTarget.setAttribute('aria-pressed', String(!running)); });
+  $('reset').addEventListener('click', () => {
+    S.reset(); hist = []; marks = []; duEMA = 0; uvbEMA = null; lastRx = {}; cfcWasOn = false;
+    S.cfc = 0; cfc.value = 0; $('cfcOut').textContent = '0 %'; mont.disabled = true;
+    warm(); readouts();
+  });
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    speed = +b.dataset.speed; document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+
+  // ---- etiqueta al pasar el cursor
+  const tip = $('tip'), names = { O2: ['O₂', 'oxígeno molecular'], O: ['O•', 'oxígeno atómico (radical)'], O3: ['O₃', 'ozono'], CFC: ['CCl₂F₂', 'clorofluorocarbono (freón‑12)'], Cl: ['Cl•', 'radical cloro'], ClO: ['ClO', 'monóxido de cloro'], R: ['CClF₂•', 'resto del CFC'] };
+  cv.addEventListener('mousemove', e => {
+    const rect = cv.getBoundingClientRect(), k = S.W / rect.width, x = (e.clientX - rect.left) * k, y = (e.clientY - rect.top) * k;
+    let best = null, bd = 196;
+    for (const m of S.mols) { if (m.dead) continue; const d = (m.x - x) ** 2 + (m.y - y) ** 2; if (d < bd) { bd = d; best = m; } }
+    if (!best) { tip.hidden = true; return; }
+    const n = names[best.kind]; tip.innerHTML = '<b>' + n[0] + '</b> · ' + n[1];
+    tip.style.left = (best.x / k) + 'px'; tip.style.top = (best.y / k) + 'px'; tip.hidden = false;
+  });
+  cv.addEventListener('mouseleave', () => { tip.hidden = true; });
+
+  // arranque en equilibrio, para no empezar con la estratosfera vacía de ozono
+  function warm() { for (let i = 0; i < 4000; i++) S.stepOnce(); for (const k in S.rx) S.rx[k] = 0; S.surf = []; S.sent = []; }
+  warm(); readouts();
+  requestAnimationFrame(loop);
+})();
+</script>
