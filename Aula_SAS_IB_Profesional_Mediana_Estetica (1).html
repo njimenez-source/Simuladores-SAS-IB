@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aula Interactiva SAS NM – Repaso Integral</title>
+<style>
+:root{
+  --bg:#f5f8fb;
+  --paper:#ffffff;
+  --ink:#1f2937;
+  --muted:#667085;
+  --line:#d7dee8;
+  --brand:#0f766e;
+  --brand-2:#155e75;
+  --accent:#f59e0b;
+  --soft:#ecfdf5;
+  --soft2:#eff6ff;
+  --danger:#dc2626;
+  --shadow:0 10px 30px rgba(15, 23, 42, .08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#f8fbff 0,#eef4f8 220px,var(--bg) 100%);color:var(--ink);line-height:1.55}
+a{color:var(--brand-2);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{width:min(1280px,94vw);margin:auto}
+.hero{padding:28px 0 16px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .85fr;gap:22px}
+.hero-card{background:linear-gradient(135deg,#0f766e,#155e75);border-radius:28px;padding:28px;color:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero-card::after{content:"";position:absolute;right:-60px;bottom:-70px;width:220px;height:220px;background:radial-gradient(circle,rgba(255,255,255,.24),transparent 68%)}
+.hero-card h1{margin:8px 0 12px;font-size:clamp(2rem,3vw,3rem);line-height:1.05}
+.hero-card p{margin:0;color:rgba(255,255,255,.92)}
+.hero-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.hero-tags span{padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);font-size:.92rem}
+.side-card{background:var(--paper);border-radius:24px;padding:22px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.side-card h2{margin:0 0 10px;font-size:1.2rem}
+.side-card ol{margin:10px 0 0 18px;padding:0}
+.side-card li{margin:7px 0}
+.callout{background:#fff7e8;border:1px solid #f5d38f;border-radius:18px;padding:14px 16px;color:#7a4b00;margin-top:14px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.metric{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
+.metric strong{display:block;font-size:1.8rem;color:var(--brand-2)}
+.toolbar{position:sticky;top:0;z-index:30;background:rgba(245,248,251,.92);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,.5);border-bottom:1px solid var(--line)}
+.nav{display:flex;gap:10px;overflow:auto;padding:12px 0}
+.nav a{white-space:nowrap;background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 14px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.03)}
+.section{padding:28px 0 10px}
+.section-head{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:16px}
+.section-head h2{margin:0;font-size:1.75rem}
+.section-head p{margin:8px 0 0;color:var(--muted);max-width:72ch}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.formula-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.formula-card{padding:18px}
+.formula-card h3{margin:0 0 8px;font-size:1.08rem}
+.formula-box{background:var(--soft);border:1px solid #b7e4c7;border-radius:14px;padding:12px 14px;font:600 1.12rem Cambria,Georgia,serif;color:#065f46;margin:10px 0}
+.small{font-size:.93rem;color:var(--muted)}
+.note{padding:16px 18px}
+.note strong{color:var(--brand)}
+.clean{width:100%;border-collapse:collapse;background:#fff}
+.clean th,.clean td{border:1px solid var(--line);padding:8px 9px;text-align:center}
+.clean th{background:#eff6ff}
+.clean td:first-child,.clean th:first-child{text-align:left;font-weight:700}
+.city-card{padding:16px}
+.city-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.pill{display:inline-flex;padding:7px 12px;background:#ecfeff;border:1px solid #bae6fd;border-radius:999px;color:#0c4a6e;font-weight:700;font-size:.9rem}
+.chart-wrap,.svg-wrap{border:1px solid var(--line);border-radius:18px;padding:12px;background:linear-gradient(180deg,#ffffff 0,#fbfdff 100%);overflow:auto;display:flex;justify-content:center;align-items:center}
+.chart-wrap canvas,.svg-wrap svg{width:min(100%,680px);height:auto;display:block;cursor:zoom-in;margin:auto;flex:0 0 auto}
+.exercise-card{padding:18px;display:grid;grid-template-columns:minmax(320px,.92fr) minmax(0,1.08fr);gap:18px;align-items:start}
+.exercise-body h3{margin:0 0 8px;font-size:1.12rem}
+.exercise-body p{margin:0 0 10px}
+details{background:#fbfdff;border:1px dashed #cbd5e1;border-radius:14px;padding:10px 12px;margin:10px 0}
+details summary{cursor:pointer;font-weight:700;color:var(--brand-2)}
+textarea,input[type="text"],input[type="number"]{width:100%;padding:11px 13px;border-radius:14px;border:1px solid #cdd5df;font:inherit;background:#fff}
+textarea{min-height:120px;resize:vertical}
+.note-label{display:block;font-weight:700;margin-top:10px}
+.note-label textarea,.note-label input{margin-top:6px;font-weight:400}
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+button{border:none;background:var(--brand);color:#fff;padding:11px 15px;border-radius:14px;font-weight:700;font:inherit;cursor:pointer;box-shadow:var(--shadow)}
+button.secondary{background:#fff;color:var(--brand-2);border:1px solid var(--line)}
+.correct{color:#166534;font-weight:700}
+.incorrect{color:#b91c1c;font-weight:700}
+.status{font-size:.94rem;margin-top:8px}
+.checkboxline{display:flex;gap:10px;align-items:flex-start;margin-top:10px;font-size:.95rem}
+.checkboxline input{width:auto;margin-top:3px}
+.progress-card{padding:18px}
+.progressbar{height:14px;background:#e8eef5;border-radius:999px;overflow:hidden;margin:12px 0 14px}
+.progressbar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#14b8a6,#155e75)}
+.rubric{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px}
+.rubric ul{margin:8px 0 0 18px;padding:0}
+hr.sep{border:none;border-top:1px solid var(--line);margin:18px 0}
+.footer{padding:40px 0 60px;color:var(--muted)}
+.print-hide{}
+@media (max-width:1100px){
+  .hero-grid,.grid-3,.grid-4,.formula-grid{grid-template-columns:1fr}
+  .grid-2,.exercise-card{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .chart-wrap canvas,.svg-wrap svg{width:min(100%,760px)}
+}
+@media (max-width:680px){
+  .metrics{grid-template-columns:1fr}
+  .hero-card,.side-card{padding:20px}
+  .section-head{display:block}
+  .chart-wrap,.svg-wrap{padding:10px}
+  .chart-wrap canvas,.svg-wrap svg{width:100%}
+}
+
+.zoom-hint{font-size:.88rem;color:var(--muted);margin-top:8px}
+.zoom-modal{position:fixed;inset:0;background:rgba(15,23,42,.78);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px}
+.zoom-modal.open{display:flex}
+.zoom-inner{background:#fff;border-radius:22px;max-width:min(1400px,96vw);max-height:92vh;width:100%;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+.zoom-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.zoom-stage{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff;padding:12px;display:flex;justify-content:center;align-items:flex-start}
+.zoom-stage svg,.zoom-stage canvas{width:100%;height:auto;display:block;cursor:default}
+.zoom-close{background:var(--danger)}
+
+@media print{
+  .toolbar,.print-hide,button,details summary{display:none !important}
+  body{background:#fff}
+  .card,.hero-card,.side-card{box-shadow:none}
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="container hero-grid">
+    <section class="hero-card">
+      <div class="hero-tags">
+        <span>SAS NM</span><span>Una sola página</span><span>Gráficos diseñados en HTML</span><span>Autoguardado</span>
+      </div>
+      <h1>Aula Interactiva de Repaso<br>Sistemas Ambientales y Sociedades</h1>
+      <p>Versión profesional rediseñada como recurso autosuficiente: sin imágenes externas, con tablas limpias, gráficos elaborados dentro del propio HTML, preguntas tipo basadas en tus ejemplos y ayudas para que el estudiante sepa exactamente qué fórmula usar, qué escribir y cómo justificar sus respuestas.</p>
+      <div class="action-row print-hide" style="margin-top:16px">
+        <button onclick="downloadReport()">Descargar informe</button>
+        <button class="secondary" onclick="window.print()">Imprimir</button>
+        <button class="secondary" onclick="resetProgress()">Reiniciar progreso</button>
+      </div>
+    </section>
+    <aside class="side-card">
+      <h2>Cómo aprovechar este recurso</h2>
+      <ol>
+        <li>Repasa primero la <strong>caja de fórmulas</strong>.</li>
+        <li>Observa el <strong>gráfico o esquema</strong> antes de leer la pista.</li>
+        <li>Escribe siempre: <strong>fórmula → sustitución → cálculo → unidad → interpretación</strong>.</li>
+        <li>Abre la pista solo si te bloqueas.</li>
+        <li>Usa la respuesta orientativa para comprobar tu razonamiento, no solo el número final.</li>
+      </ol>
+      <div class="callout"><strong>Consejo de examinador:</strong> cuando la pregunta pide “describe”, enfócate en patrones. Si pide “explique” o “razone”, conecta esos patrones con procesos ecológicos o sociales. En preguntas numéricas, el número solo <em>no</em> da toda la calificación.</div>
+    </aside>
+  </div>
+  <div class="container metrics">
+    <div class="metric"><strong>1</strong><span>página integral</span></div>
+    <div class="metric"><strong>100%</strong><span>gráficos diseñados en HTML/SVG/Canvas</span></div>
+    <div class="metric"><strong>30+</strong><span>preguntas tipo</span></div>
+    <div class="metric"><strong id="doneCount">0</strong><span>actividades marcadas</span></div>
+  </div>
+</header>
+
+<div class="toolbar print-hide">
+  <div class="container nav">
+    <a href="#panel">Panel</a>
+    <a href="#formulas">Fórmulas</a>
+    <a href="#climogramas">Climogramas</a>
+    <a href="#productividad">Productividad</a>
+    <a href="#biodiversidad">Biodiversidad</a>
+    <a href="#poblacion">Población humana</a>
+    <a href="#graficos">Interpretación gráfica</a>
+    <a href="#simulacro">Simulacro final</a>
+  </div>
+</div>
+
+<main class="container">
+
+<section id="panel" class="section">
+  <div class="section-head">
+    <div>
+      <h2>Panel de progreso</h2>
+      <p>La página guarda automáticamente tus respuestas en este navegador. Marca las actividades cuando las termines y descarga tu informe al final.</p>
+    </div>
+  </div>
+  <div class="card progress-card">
+    <div class="progressbar"><span id="progressFill"></span></div>
+    <p><strong>Avance:</strong> <span id="progressText">0 %</span></p>
+    <label class="note-label">Mi objetivo de estudio de hoy<textarea data-save="true" data-report-label="Objetivo de estudio"></textarea></label>
+  </div>
+</section>
+
+<section id="formulas" class="section">
+  <div class="section-head"><div><h2>Caja de herramientas: fórmulas clave</h2><p>Estas fórmulas se seleccionaron en función de los tipos de ejercicios que aparecen en tus documentos.</p></div></div>
+  <div class="formula-grid">
+    <div class="formula-card card">
+      <h3>Climogramas</h3>
+      <div class="formula-box">Amplitud térmica = T<sub>máx</sub> − T<sub>mín</sub></div>
+      <div class="formula-box">Precipitación anual = Σ precipitación mensual</div>
+      <p class="small">Cómo responder: indica el mes más frío y el más cálido, calcula la amplitud térmica y describe la distribución de lluvias a lo largo del año para proponer un tipo de clima.</p>
+    </div>
+    <div class="formula-card card">
+      <h3>Productividad y producción</h3>
+      <div class="formula-box">Producción neta = Producción bruta − Respiración</div>
+      <div class="formula-box">Productividad = Producción / Biomasa</div>
+      <p class="small">Si te piden porcentaje, multiplica por 100. No olvides comentar qué significa una productividad alta o baja.</p>
+    </div>
+    <div class="formula-card card">
+      <h3>Densidad y tasas demográficas</h3>
+      <div class="formula-box">Densidad = Población / Superficie</div>
+      <div class="formula-box">TBN = (Nacimientos / Población) × 1000</div>
+      <div class="formula-box">TBM = (Defunciones / Población) × 1000</div>
+      <div class="formula-box">Crecimiento natural (%) = (TBN − TBM) / 10</div>
+      <p class="small">Lee con cuidado si la consigna pide el resultado en ‰ o en %.</p>
+    </div>
+    <div class="formula-card card">
+      <h3>Tiempo de duplicación</h3>
+      <div class="formula-box">Tiempo de duplicación = 70 / tasa de crecimiento natural (%)</div>
+      <p class="small">Úsalo cuando te den una tasa porcentual anual y te pidan estimar en cuántos años se duplicaría una población.</p>
+    </div>
+    <div class="formula-card card">
+      <h3>Índice de Lincoln</h3>
+      <div class="formula-box">N ≈ (n<sub>1</sub> × n<sub>2</sub>) / m<sub>2</sub></div>
+      <p class="small">n₁ = individuos capturados y marcados en la primera muestra; n₂ = capturados en la segunda muestra; m₂ = capturados marcados en la segunda muestra.</p>
+    </div>
+    <div class="formula-card card">
+      <h3>Índice de Simpson</h3>
+      <div class="formula-box">D = N(N−1) / Σn(n−1)</div>
+      <p class="small">Asegúrate de indicar qué versión de la fórmula estás usando, porque en algunos textos cambia la notación.</p>
+    </div>
+    <div class="formula-card card">
+      <h3>Transferencia de energía</h3>
+      <div class="formula-box">Eficiencia = (energía del nivel superior / energía del nivel inferior) × 100</div>
+      <p class="small">Sirve para justificar la forma de las pirámides tróficas y la pérdida de energía entre niveles.</p>
+    </div>
+    <div class="formula-card card">
+      <h3>Estrategia de interpretación gráfica</h3>
+      <div class="formula-box">Describe → Compara → Calcula → Interpreta</div>
+      <p class="small">Usa verbos como: aumenta, disminuye, fluctúa, se estabiliza, presenta un pico, muestra una relación positiva/negativa.</p>
+    </div>
+  </div>
+</section>
+
+<section id="climogramas" class="section">
+  <div class="section-head"><div><h2>Climogramas rediseñados</h2><p>Estos climogramas fueron dibujados directamente en esta página a partir de los datos del ejercicio original.</p></div></div>
+  <div class="grid-2" id="climoGrid"></div>
+</section>
+
+<section id="productividad" class="section">
+  <div class="section-head"><div><h2>Productividad, flujo de energía y pirámides ecológicas</h2><p>Preguntas tipo elaboradas a partir de tus ejercicios de productividad y pirámides ecológicas.</p></div></div>
+  <div class="grid-2" id="prodGrid"></div>
+</section>
+
+<section id="biodiversidad" class="section">
+  <div class="section-head"><div><h2>Biodiversidad, Lincoln, Simpson y clasificación</h2><p>Actividades tipo basadas en estimación poblacional, índices de diversidad y organización de organismos.</p></div></div>
+  <div class="grid-2" id="bioGrid"></div>
+</section>
+
+<section id="poblacion" class="section">
+  <div class="section-head"><div><h2>Dinámica de población humana</h2><p>Ejercicios tipo inspirados en los problemas de densidad, natalidad, mortalidad y crecimiento natural que compartiste.</p></div></div>
+  <div class="grid-2" id="popGrid"></div>
+</section>
+
+<section id="graficos" class="section">
+  <div class="section-head"><div><h2>Interpretación gráfica</h2><p>Conjunto de gráficos diseñados en la página, inspirados en la estructura de tus ejemplos: población, agua, energía, pesca, biodiversidad y contaminación.</p></div></div>
+  <div class="grid-2" id="graphGrid"></div>
+</section>
+
+<section id="simulacro" class="section">
+  <div class="section-head"><div><h2>Simulacro final breve</h2><p>Mini-evaluación para repasar conceptos, cálculos y análisis de datos.</p></div></div>
+  <div class="card" style="padding:18px">
+    <div class="grid-2">
+      <div>
+        <label class="note-label">1. Si una población tiene una tasa de crecimiento natural de 1.4 %, ¿cuál es su tiempo de duplicación?<input type="number" step="0.1" data-expected="50" data-tol="0.6" data-save="true" data-report-label="Simulacro 1"></label>
+        <button class="secondary print-hide" onclick="checkSingle(this)">Comprobar</button><div class="status"></div>
+      </div>
+      <div>
+        <label class="note-label">2. Si la energía en fitoplancton es 20000 J m⁻² año⁻¹ y en zooplancton 500 J m⁻² año⁻¹, ¿cuál es la eficiencia (%)?<input type="number" step="0.1" data-expected="2.5" data-tol="0.2" data-save="true" data-report-label="Simulacro 2"></label>
+        <button class="secondary print-hide" onclick="checkSingle(this)">Comprobar</button><div class="status"></div>
+      </div>
+      <div>
+        <label class="note-label">3. Explica por qué una pirámide de biomasa puede estar invertida en ecosistemas acuáticos.<textarea data-save="true" data-report-label="Simulacro 3"></textarea></label>
+        <div class="rubric"><strong>Qué debería incluir:</strong><ul><li>fitoplancton con biomasa instantánea baja</li><li>alta tasa de renovación</li><li>consumo rápido por niveles superiores</li></ul></div>
+      </div>
+      <div>
+        <label class="note-label">4. Describe una diferencia clave entre “describir un gráfico” y “explicar un gráfico”.<textarea data-save="true" data-report-label="Simulacro 4"></textarea></label>
+        <div class="rubric"><strong>Qué debería incluir:</strong><ul><li>describir = patrones observables</li><li>explicar = causas o procesos que justifican esos patrones</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="card note">
+    <h2 style="margin-top:0">Recomendaciones finales para el estudiante</h2>
+    <ul>
+      <li>Si una pregunta es numérica, <strong>escribe el procedimiento completo</strong>.</li>
+      <li>Si una respuesta abierta vale varios puntos, divide mentalmente tu respuesta en <strong>ideas separadas</strong>.</li>
+      <li>Al interpretar gráficos, menciona siempre <strong>tendencia general, valores extremos y comparaciones</strong>.</li>
+      <li>En preguntas de ecología, intenta usar vocabulario disciplinar: <strong>biomasa, productividad, tasa de renovación, transferencia de energía, crecimiento natural, riqueza, abundancia relativa</strong>.</li>
+    </ul>
+  </div>
+</footer>
+</main>
+
+<script>
+const storeKey='sas_prof_custom_only_v2';
+const months=['E','F','M','A','M','J','J','A','S','O','N','D'];
+const climoData=[
+  {city:'Madrid', temps:[6.1,7.9,10.7,12.5,16.1,21.0,24.8,24.4,20.5,14.6,9.7,7.0], precip:[37,35,26,47,52,25,15,10,28,49,56,56], climate:'Mediterráneo continentalizado'},
+  {city:'Puerto de Navacerrada', temps:[-0.6,-0.2,1.5,2.5,6.5,11.9,16.2,16.3,12.4,6.7,2.8,0.7], precip:[141,116,92,138,142,71,33,24,63,143,186,176], climate:'Clima de montaña'},
+  {city:'Valencia', temps:[11.5,12.6,13.9,15.5,18.4,22.1,24.9,25.5,23.1,19.1,14.9,12.4], precip:[36,32,35,37,34,23,9,19,51,74,51,52], climate:'Mediterráneo litoral'},
+  {city:'Almería', temps:[12.5,13.2,14.7,16.4,19.1,22.7,25.7,26.4,24.0,20.0,16.2,13.7], precip:[23,21,15,20,14,10,1,1,12,28,23,23], climate:'Semiárido'}
+];
+
+const productivityCards=[
+  {
+    title:'Pirámide de biomasa',
+    graphic:'pyramid1',
+    prompt:'Observa la pirámide y responde: (a) ¿qué tipo de pirámide es? (b) ¿qué información aporta? (c) explica por qué no puede haber un número ilimitado de niveles tróficos.',
+    hint:'Fíjate en la unidad: si se expresa en kg C/m², se trata de biomasa. Relaciónalo con la pérdida de energía entre niveles.',
+    rubric:['Identifica que es una pirámide de biomasa.','Explica que la biomasa disminuye hacia niveles superiores.','Relaciona la reducción con las pérdidas energéticas y la regla del 10 %.']
+  },
+  {
+    title:'Construcción de pirámide de números',
+    graphic:'numbersPyramid',
+    prompt:'Con los datos del recuadro, construye una pirámide ecológica y señala a qué tipo corresponde.',
+    hint:'Los datos representan número de individuos, así que la pirámide que debes construir es una pirámide de números.',
+    rubric:['Menciona “pirámide de números”.','Ordena productores en la base y consumidores hacia arriba.','Comenta si la forma es regular o no.']
+  },
+  {
+    title:'Producción neta y productividad',
+    graphic:'prodTable1',
+    prompt:'Calcula la producción neta y la productividad neta de plantas y herbívoros. Muestra el procedimiento completo.',
+    hint:'Primero resta respiración a producción bruta; luego divide la producción neta entre la biomasa.',
+    numeric:[
+      {label:'PN plantas (mg C/m²/día)', expected:1200, tol:1},
+      {label:'Productividad plantas (%)', expected:2.18, tol:0.08},
+      {label:'PN herbívoros (mg C/m²/día)', expected:40, tol:0.5},
+      {label:'Productividad herbívoros (%)', expected:0.8, tol:0.06}
+    ]
+  },
+  {
+    title:'Productividad en ecosistema acuático',
+    graphic:'prodTable2',
+    prompt:'A partir de la tabla, calcula la productividad de cada nivel trófico y comenta qué característica destaca en la forma de la pirámide de biomasa.',
+    hint:'Recuerda que en sistemas acuáticos la pirámide de biomasa puede verse invertida por el rápido recambio del fitoplancton.',
+    rubric:['Aplica productividad = producción / biomasa.','Señala la alta productividad del fitoplancton.','Explica la inversión de biomasa en ecosistemas acuáticos.']
+  },
+  {
+    title:'Producción primaria neta',
+    graphic:'prodForest',
+    prompt:'Usando la tabla del ecosistema forestal: (a) calcula la producción primaria neta; (b) nombra factores limitantes de la producción primaria.',
+    hint:'La PPN es la producción bruta menos la respiración de los productores.',
+    rubric:['Calcula correctamente la PPN.','Distingue productores y descomponedores.','Menciona factores como luz, agua, temperatura y nutrientes.']
+  },
+  {
+    title:'Transferencia de energía',
+    graphic:'marineFood',
+    prompt:'Calcula la eficacia de transferencia de energía entre el zooplancton y el arenque. Luego explica qué indica ese valor.',
+    hint:'Usa energía del nivel superior / energía del nivel inferior × 100.',
+    numeric:[{label:'Eficiencia (%)', expected:5, tol:0.2}],
+    rubric:['Muestra la fórmula.','Obtiene 5 %.','Explica que solo una pequeña fracción de la energía pasa al siguiente nivel.']
+  }
+];
+
+const biodiversityCards=[
+  {
+    title:'Índice de Lincoln: tortugas',
+    graphic:'lincolnTurtles',
+    prompt:'En la primera visita se capturan 8 tortugas y se marcan. En la segunda muestra se capturan 12, de las cuales 2 están marcadas. Estima el tamaño poblacional.',
+    hint:'Usa N ≈ (n1 × n2) / m2.',
+    numeric:[{label:'Tamaño poblacional estimado', expected:48, tol:0.5}],
+    rubric:['Sustituye correctamente los datos.','Indica N≈48 individuos.','Si es posible, menciona los supuestos del método.']
+  },
+  {
+    title:'Índice de Lincoln: peces',
+    graphic:'lincolnFish',
+    prompt:'Se capturan 645 peces y se marcan. En la segunda muestra aparecen 84 marcados y 482 sin marcar. Estima la población total.',
+    hint:'La segunda muestra total es 84 + 482.',
+    numeric:[{label:'Tamaño poblacional estimado', expected:(645*(84+482)/84), tol:2}],
+    rubric:['Calcula el tamaño de la segunda muestra.','Aplica correctamente la fórmula.','Expresa el resultado como estimación.']
+  },
+  {
+    title:'Índice de Simpson: bosque A y B',
+    graphic:'simpsonForest',
+    prompt:'Calcula el índice de diversidad de Simpson para los ecosistemas A y B usando la fórmula D = N(N−1)/Σn(n−1).',
+    hint:'Para ambos ecosistemas, N = 100.',
+    numeric:[
+      {label:'D del ecosistema A', expected:9900/(84*83+16*15), tol:0.03},
+      {label:'D del ecosistema B', expected:9900/(50*49+50*49), tol:0.03}
+    ],
+    rubric:['Presenta el cálculo de cada ecosistema.','Concluye cuál ecosistema es más diverso con esta convención.']
+  },
+  {
+    title:'Riqueza y abundancia relativa',
+    graphic:'riverTable',
+    prompt:'La tabla compara dos ríos. Calcula la riqueza de especies y explica cuál río muestra una comunidad más equilibrada.',
+    hint:'Riqueza = número de especies presentes; comunidad equilibrada = abundancias menos dominadas por una sola especie.',
+    rubric:['Cuenta correctamente las especies presentes en cada río.','Compara la distribución de abundancias.','Concluye que el río con mayor equidad es el más equilibrado.']
+  },
+  {
+    title:'Clave dicotómica simple',
+    graphic:'dichoOrganisms',
+    prompt:'Observa los organismos diseñados a continuación y redacta una clave dicotómica simple.',
+    hint:'Empieza separando: con alas / sin alas; luego usa patas, forma corporal y presencia de segmentos.',
+    rubric:['La clave debe ser binaria.','Cada paso debe usar rasgos observables.','Debe permitir identificar todos los organismos.']
+  },
+  {
+    title:'Diversidad en una muestra de insectos',
+    graphic:'insectCounts',
+    prompt:'Cinco especies de insectos tienen abundancias 5, 2, 8, 3 y 22. Calcula el índice de Simpson usando D = N(N−1)/Σn(n−1).',
+    hint:'Suma todas las abundancias para hallar N.',
+    numeric:[{label:'Índice de Simpson', expected:(40*39)/(5*4+2*1+8*7+3*2+22*21), tol:0.05}],
+    rubric:['Muestra el valor de N.','Suma correctamente Σn(n−1).','Presenta e interpreta el resultado.']
+  }
+];
+
+const populationCards=[
+  {
+    title:'Densidad poblacional por países',
+    graphic:'densityTable',
+    prompt:'Completa las densidades de Hungría, España, China, EE.UU. y Singapur.',
+    hint:'Divide la población total entre la superficie en km².',
+    rubric:['Usa la fórmula correctamente.','Expresa en hab/km².','Compara cuáles son las densidades más altas y bajas.']
+  },
+  {
+    title:'Natalidad, mortalidad y crecimiento natural',
+    graphic:'natMortTable',
+    prompt:'Calcula las tasas de natalidad, mortalidad y crecimiento natural de los países A, B y C. Luego propón cuál se parece más a un país desarrollado y cuál a uno en desarrollo.',
+    hint:'Recuerda que crecimiento natural en ‰ = TBN − TBM; si la consigna pide %, divide entre 10.',
+    rubric:['Calcula correctamente las tasas.','Compara magnitudes entre países.','Justifica la relación con desarrollo demográfico.']
+  },
+  {
+    title:'Crecimiento natural global y tiempo de duplicación',
+    graphic:'birthDeathGlobal',
+    prompt:'Usando la tabla: (a) calcula la tasa de crecimiento natural global en 2011; (b) si en 2000 la tasa fue 1.3 %, calcula el tiempo de duplicación.',
+    hint:'2011: resta natalidad bruta − mortalidad bruta y divide entre 10.',
+    numeric:[
+      {label:'Crecimiento natural 2011 (%)', expected:(19.15-8.12)/10, tol:0.03},
+      {label:'Tiempo de duplicación (años)', expected:70/1.3, tol:1}
+    ],
+    rubric:['Calcula el crecimiento natural.','Aplica la regla del 70.','Interpreta qué significa el tiempo obtenido.']
+  },
+  {
+    title:'Continentes: comparación de tasas',
+    graphic:'continentsTable',
+    prompt:'A partir de la tabla de continentes, identifica qué continente presenta el crecimiento natural más alto y cuál presenta crecimiento negativo.',
+    hint:'No hace falta recalcular todo si sabes comparar natalidad y mortalidad.',
+    rubric:['Reconoce el continente con mayor diferencia natalidad−mortalidad.','Identifica el crecimiento natural negativo.','Usa terminología adecuada.']
+  },
+  {
+    title:'Mortalidad general e infantil',
+    graphic:'sevillaCard',
+    prompt:'Con los datos de la ciudad de ejemplo, calcula la tasa bruta de mortalidad general y la tasa bruta de mortalidad infantil.',
+    hint:'Mortalidad general usa población total; mortalidad infantil usa nacidos vivos.',
+    numeric:[
+      {label:'Tasa bruta de mortalidad general (‰)', expected:(5821/684633)*1000, tol:0.1},
+      {label:'Tasa bruta de mortalidad infantil (‰)', expected:(39/7432)*1000, tol:0.1}
+    ],
+    rubric:['Distingue correctamente ambos denominadores.','Expresa en ‰.','Muestra la fórmula completa.']
+  },
+  {
+    title:'Tiempo de duplicación en Costa Rica',
+    graphic:'doublingCosta',
+    prompt:'La tasa de crecimiento natural es 1.05 %. Calcula el tiempo de duplicación.',
+    hint:'Usa la regla del 70.',
+    numeric:[{label:'Tiempo de duplicación (años)', expected:70/1.05, tol:1}],
+    rubric:['Escribe la fórmula.','Calcula ~66.7 años.','Interpreta el resultado como estimación.']
+  }
+];
+
+const graphCards=[
+  {
+    title:'Proyecciones de población mundial por regiones',
+    graphic:'worldPopulation',
+    prompt:'¿Aproximadamente cuántas veces se espera que la población mundial en 2125 supere a la de 1950?',
+    hint:'Compara visualmente la altura total al inicio y al final.',
+    numeric:[{label:'Factor aproximado', expected:4, tol:0.4}],
+    rubric:['Compara valor inicial y final.','Da una estimación razonable.']
+  },
+  {
+    title:'Grupos de animales a lo largo del tiempo geológico',
+    graphic:'animalFamilies',
+    prompt:'Describe y explica la forma general del gráfico.',
+    hint:'Menciona tendencia general, periodos de estabilidad y caídas pronunciadas.',
+    rubric:['Describe el aumento a largo plazo.','Menciona periodos de estabilidad.','Señala grandes declives asociados a extinciones.']
+  },
+  {
+    title:'pH y plomo en un lago',
+    graphic:'lakePhLead',
+    prompt:'Identifica el año con mayor concentración de plomo y el año con agua más ácida. Luego razona si la calidad del agua mejora o empeora con el tiempo.',
+    hint:'Mayor acidez = menor pH.',
+    rubric:['Identifica correctamente ambos años.','Relaciona menor plomo y pH más cercano a neutro con mejora de calidad.']
+  },
+  {
+    title:'Relación entre área insular y riqueza de especies',
+    graphic:'islandSpecies',
+    prompt:'Describe la relación entre el área de la isla y el número de especies de plantas con flores.',
+    hint:'Observa si la relación es positiva y si la pendiente cambia.',
+    rubric:['Indica relación positiva.','Comenta que la tasa de aumento disminuye a mayores áreas.']
+  },
+  {
+    title:'Cambios en fuentes de energía',
+    graphic:'energyMix',
+    prompt:'Describe los cambios en el uso de las fuentes de energía entre 1940 y 2000.',
+    hint:'Compara qué fuente domina al inicio y cómo cambia la participación de las demás.',
+    rubric:['Comenta el descenso del carbón.','Comenta el aumento del petróleo.','Menciona la aparición de nuclear y renovables.']
+  },
+  {
+    title:'Políticas pesqueras',
+    graphic:'fishingPolicy',
+    prompt:'Compara las capturas acumuladas durante cuatro años y la diferencia porcentual en las capturas del año 4.',
+    hint:'Suma las partes de captura de las barras grises. Luego compara el año 4.',
+    rubric:['Obtiene captura acumulada similar en ambas políticas.','Calcula la diferencia porcentual del año 4.','Interpreta la sostenibilidad relativa.']
+  },
+  {
+    title:'Consumo medio diario de agua',
+    graphic:'waterUse',
+    prompt:'Calcula el porcentaje de disminución del consumo medio diario de agua por persona entre 1990 y 2020.',
+    hint:'Usa el dato de 1990 como valor inicial.',
+    numeric:[{label:'Disminución (%)', expected:((1050-454)/1050)*100, tol:0.4}],
+    rubric:['Aplica la fórmula de cambio porcentual.','Redondea apropiadamente.']
+  },
+  {
+    title:'Consumo eléctrico de Beijing',
+    graphic:'beijingElectricity',
+    prompt:'Calcula el aumento medio anual de la demanda de energía entre 2008 y 2019.',
+    hint:'Resta valor final−inicial y divide entre el número de años.',
+    numeric:[{label:'Aumento medio anual (miles de millones de kWh)', expected:(117.020-71.195)/(2019-2008), tol:0.1}],
+    rubric:['Identifica correctamente inicio y fin.','Divide entre 11 años.']
+  },
+  {
+    title:'Ambiente forestal vs urbano',
+    graphic:'infiltration',
+    prompt:'Calcula la diferencia de infiltración total entre el entorno forestal y el urbano.',
+    hint:'Suma infiltración superficial y profunda en cada entorno.',
+    numeric:[{label:'Diferencia (%)', expected:35, tol:0.3}],
+    rubric:['Suma correctamente las infiltraciones.','Compara ambos ambientes.']
+  },
+  {
+    title:'Demanda global de agua por sector',
+    graphic:'waterDemand',
+    prompt:'Calcula el porcentaje de agua que se proyecta destinar a agricultura en 2025.',
+    hint:'Porcentaje = demanda agrícola / demanda total × 100.',
+    numeric:[{label:'Porcentaje agrícola 2025 (%)', expected:(2500/4250)*100, tol:0.5}],
+    rubric:['Extrae el total de 2025.','Usa correctamente la fracción.']
+  }
+];
+
+function el(tag, cls, html=''){ const x=document.createElement(tag); if(cls) x.className=cls; x.innerHTML=html; return x; }
+
+function makeTable(headers, rows){
+  let h='<table class="clean"><thead><tr>' + headers.map(x=>`<th>${x}</th>`).join('') + '</tr></thead><tbody>';
+  rows.forEach(r=>{ h+='<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>'; });
+  return h+'</tbody></table>';
+}
+
+function injectClimos(){
+  const host=document.getElementById('climoGrid');
+  climoData.forEach((c,idx)=>{
+    const amp=(Math.max(...c.temps)-Math.min(...c.temps)).toFixed(1);
+    const tmean=(c.temps.reduce((a,b)=>a+b,0)/12).toFixed(1);
+    const pann=c.precip.reduce((a,b)=>a+b,0);
+    const card=el('div','city-card card');
+    card.innerHTML=`
+      <div class="city-top"><h3 style="margin:0">${c.city}</h3><span class="pill">Amplitud: ${amp} °C</span><span class="pill">T media: ${tmean} °C</span><span class="pill">P anual: ${pann} mm</span></div>
+      <div class="chart-wrap zoomable"><canvas id="climo-${idx}" width="840" height="390"></canvas></div><div class="zoom-hint print-hide">Haz clic en el gráfico para verlo ampliado.</div>
+      <div style="margin-top:12px">${makeTable(['Variable',...months,'Total/Media'],[
+        ['Temperatura (°C)',...c.temps.map(v=>v.toFixed(1)),tmean],
+        ['Precipitación (mm)',...c.precip,pann]
+      ])}</div>
+      <div class="rubric" style="margin-top:12px"><strong>Qué debería hacer el estudiante:</strong><ul><li>identificar temperatura máxima y mínima</li><li>calcular amplitud térmica</li><li>describir distribución de lluvias</li><li>proponer el tipo de clima: <strong>${c.climate}</strong></li></ul></div>
+      <label class="note-label">Conclusión sobre el clima de ${c.city}<textarea data-save="true" data-report-label="Climograma ${c.city}"></textarea></label>
+      <label class="checkboxline"><input type="checkbox" data-save="true" data-report-label="Climograma ${c.city} completado"> Marcar como resuelto</label>
+    `;
+    host.appendChild(card);
+    drawClimograph(`climo-${idx}`, c.temps, c.precip);
+  });
+}
+
+function drawClimograph(id, temps, precip){
+  const cv=document.getElementById(id); const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,m={l:54,r:54,t:24,b:40}; const plotW=W-m.l-m.r, plotH=H-m.t-m.b;
+  const maxP=Math.max(...precip); const pScale=Math.ceil(maxP/20)*20; const minT=Math.floor((Math.min(...temps)-2)/5)*5; const maxT=Math.ceil((Math.max(...temps)+2)/5)*5;
+  const yP=v=>m.t+plotH-(v/pScale)*plotH; const yT=v=>m.t+plotH-((v-minT)/(maxT-minT))*plotH; const step=plotW/12;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#d6e0ea'; ctx.lineWidth=1; ctx.font='12px sans-serif'; ctx.fillStyle='#6b7280';
+  for(let i=0;i<=5;i++){ const val=i*pScale/5; const y=yP(val); ctx.beginPath(); ctx.moveTo(m.l,y); ctx.lineTo(W-m.r,y); ctx.stroke(); ctx.fillText(Math.round(val), 10, y+4); }
+  for(let i=0;i<=5;i++){ const val=minT+i*(maxT-minT)/5; const y=yT(val); ctx.fillText(Math.round(val)+'°', W-m.r+8, y+4); }
+  ctx.strokeStyle='#374151'; ctx.beginPath(); ctx.moveTo(m.l,m.t); ctx.lineTo(m.l,H-m.b); ctx.lineTo(W-m.r,H-m.b); ctx.stroke(); ctx.beginPath(); ctx.moveTo(W-m.r,m.t); ctx.lineTo(W-m.r,H-m.b); ctx.stroke();
+  precip.forEach((p,i)=>{ const x=m.l+i*step+step*.16, bw=step*.68, y=yP(p); ctx.fillStyle='rgba(56,189,248,.7)'; ctx.fillRect(x,y,bw,H-m.b-y); ctx.strokeStyle='rgba(2,132,199,.85)'; ctx.strokeRect(x,y,bw,H-m.b-y); ctx.fillStyle='#4b5563'; ctx.fillText(months[i], x+bw/2-4, H-16); });
+  ctx.strokeStyle='#ef4444'; ctx.lineWidth=2.5; ctx.beginPath(); temps.forEach((t,i)=>{ const x=m.l+i*step+step*.5, y=yT(t); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }); ctx.stroke();
+  temps.forEach((t,i)=>{ const x=m.l+i*step+step*.5, y=yT(t); ctx.fillStyle='#ef4444'; ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill(); });
+  ctx.fillStyle='#0f766e'; ctx.font='bold 12px sans-serif'; ctx.fillText('Precipitación (mm)', 8, 16);
+  ctx.fillStyle='#ef4444'; ctx.fillText('Temperatura (°C)', W-150, 16);
+}
+
+function buildCard(card, prefix){
+  const wrap=el('article','exercise-card card');
+  const left=el('div','svg-wrap zoomable');
+  left.innerHTML=getGraphic(card.graphic);
+  const right=el('div','exercise-body');
+  let html=`<h3>${card.title}</h3><p><strong>Consigna:</strong> ${card.prompt}</p><details><summary>Consejo paso a paso</summary><p>${card.hint}</p></details>`;
+  if(card.numeric){
+    html += '<div class="card" style="padding:12px;border-radius:16px;border:1px solid var(--line);box-shadow:none">';
+    card.numeric.forEach((n,idx)=>{
+      html += `<label class="note-label">${n.label}<input type="number" step="0.01" data-save="true" data-report-label="${prefix}: ${n.label}" data-expected="${n.expected}" data-tol="${n.tol||0.1}"></label>`;
+    });
+    html += `<button class="secondary print-hide" onclick="checkWithin(this)">Comprobar respuestas numéricas</button><div class="status"></div></div>`;
+  }
+  if(card.rubric){
+    html += '<details><summary>Respuesta orientativa / criterios de revisión</summary><div class="rubric"><ul>'+card.rubric.map(x=>`<li>${x}</li>`).join('')+'</ul></div></details>';
+  }
+  html += `<label class="note-label">Mi procedimiento / respuesta<textarea data-save="true" data-report-label="${prefix}: respuesta abierta"></textarea></label><label class="checkboxline"><input type="checkbox" data-save="true" data-report-label="${prefix}: completado"> Marcar como resuelto</label>`;
+  right.innerHTML=html;
+  left.insertAdjacentHTML('beforeend','<div class="zoom-hint print-hide">Haz clic en el gráfico para verlo ampliado.</div>'); wrap.append(left,right);
+  return wrap;
+}
+
+function injectExerciseSection(arr, hostId, prefix){
+  const host=document.getElementById(hostId);
+  arr.forEach((card,i)=>host.appendChild(buildCard(card, `${prefix} ${i+1} – ${card.title}`)));
+}
+
+function checkWithin(btn){
+  const box=btn.parentElement; const inputs=[...box.querySelectorAll('input[type="number"]')]; let good=0;
+  inputs.forEach(inp=>{
+    const expected=parseFloat(inp.dataset.expected), tol=parseFloat(inp.dataset.tol||0.1), val=parseFloat(inp.value);
+    if(!Number.isNaN(val) && Math.abs(val-expected)<=tol){ inp.style.borderColor='#16a34a'; good++; }
+    else inp.style.borderColor='#dc2626';
+  });
+  const status=box.querySelector('.status');
+  status.className='status ' + (good===inputs.length?'correct':'incorrect');
+  status.textContent = good===inputs.length ? 'Correcto. Las respuestas numéricas son compatibles con el rango esperado.' : `Revisa: ${good} de ${inputs.length} valores están dentro del rango esperado.`;
+  saveState();
+}
+
+function checkSingle(btn){ checkWithin(btn); }
+
+function getGraphic(name){
+  const g={
+    pyramid1:`<svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="300" rx="18" fill="#f8fbff"/><polygon points="40,240 480,240 430,190 90,190" fill="#bbf7d0" stroke="#10b981"/><polygon points="110,180 410,180 360,135 160,135" fill="#a7f3d0" stroke="#10b981"/><polygon points="190,125 330,125 295,85 225,85" fill="#6ee7b7" stroke="#10b981"/><text x="260" y="225" text-anchor="middle" font-size="18" font-weight="700" fill="#065f46">Vegetales: 9300 kg C/m²</text><text x="260" y="165" text-anchor="middle" font-size="17" font-weight="700" fill="#065f46">Herbívoros: 1100 kg C/m²</text><text x="260" y="112" text-anchor="middle" font-size="16" font-weight="700" fill="#065f46">Carnívoros: 52 kg C/m²</text><text x="24" y="28" font-size="18" font-weight="700" fill="#0f172a">Pirámide ecológica</text></svg>`,
+    numbersPyramid:`<svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="300" rx="18" fill="#f8fbff"/><polygon points="55,240 465,240 410,195 110,195" fill="#dbeafe" stroke="#3b82f6"/><polygon points="135,185 385,185 340,145 180,145" fill="#bfdbfe" stroke="#3b82f6"/><polygon points="205,135 315,135 290,100 230,100" fill="#93c5fd" stroke="#3b82f6"/><text x="260" y="225" text-anchor="middle" font-size="18" font-weight="700" fill="#1d4ed8">125 productores</text><text x="260" y="170" text-anchor="middle" font-size="17" font-weight="700" fill="#1d4ed8">180 000 consumidores primarios</text><text x="260" y="120" text-anchor="middle" font-size="16" font-weight="700" fill="#1d4ed8">80 000 consumidores secundarios</text><rect x="210" y="52" width="100" height="28" rx="10" fill="#60a5fa"/><text x="260" y="71" text-anchor="middle" font-size="15" font-weight="700" fill="white">2 terciarios</text></svg>`,
+    prodTable1:makeSvgTable(['Nivel','Producción bruta','Respiración','Biomasa'],[['Plantas','2500','1300','55000'],['Herbívoros','120','80','5000']],'Datos para producción neta y productividad'),
+    prodTable2:makeSvgTable(['Nivel','Biomasa','Producción neta'],[['Peces','2','1'],['Plancton carnívoro','5','10'],['Plancton herbívoro','20','100'],['Fitoplancton','10','1900']],'Sistema acuático'),
+    prodForest:makeSvgTable(['Nivel','P. bruta','Respiración'],[['Árboles altos','4.35','1.29'],['Árboles pequeños y arbustos','9.95','5.17'],['Vegetación herbácea','2.54','2.34'],['Descomponedores','—','5.45']],'Ecosistema forestal'),
+    marineFood:`<svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="320" rx="18" fill="#f8fbff"/><text x="260" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Cadena trófica marina y energía</text><g font-size="15" fill="#334155" font-weight="700"><text x="90" y="270">Fitoplancton</text><text x="95" y="215">Zooplancton</text><text x="120" y="160">Arenque</text><text x="165" y="105">Bacalao</text><text x="200" y="50">Foca</text></g><g fill="#0ea5e9"><circle cx="55" cy="262" r="16"/><circle cx="40" cy="255" r="10"/><circle cx="68" cy="255" r="10"/></g><g fill="#38bdf8"><circle cx="60" cy="205" r="14"/><circle cx="45" cy="212" r="8"/><circle cx="74" cy="212" r="8"/></g><g fill="#64748b"><path d="M50 160 Q85 140 120 160 Q85 180 50 160Z"/><polygon points="45,160 30,148 30,172" fill="#64748b"/></g><g fill="#475569"><path d="M95 105 Q135 85 175 105 Q135 125 95 105Z"/><polygon points="88,105 70,92 70,118" fill="#475569"/></g><g fill="#94a3b8"><ellipse cx="230" cy="52" rx="46" ry="22"/><ellipse cx="265" cy="52" rx="18" ry="12" fill="#cbd5e1"/></g><g stroke="#64748b" stroke-width="2"><line x1="60" y1="235" x2="60" y2="223"/><polygon points="60,217 56,225 64,225" fill="#64748b"/><line x1="60" y1="180" x2="60" y2="168"/><polygon points="60,162 56,170 64,170" fill="#64748b"/><line x1="100" y1="125" x2="100" y2="113"/><polygon points="100,107 96,115 104,115" fill="#64748b"/><line x1="180" y1="80" x2="180" y2="68"/><polygon points="180,62 176,70 184,70" fill="#64748b"/></g><g font-size="16" font-weight="700" fill="#0f172a"><text x="340" y="265">20000 J m⁻² año⁻¹</text><text x="340" y="210">500 J m⁻² año⁻¹</text><text x="340" y="155">25 J m⁻² año⁻¹</text><text x="340" y="100">5 J m⁻² año⁻¹</text><text x="340" y="45">1 J m⁻² año⁻¹</text></g></svg>`,
+    lincolnTurtles:`<svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="280" rx="18" fill="#f8fbff"/><text x="30" y="32" font-size="18" font-weight="700">Método de Lincoln: tortugas</text><g><rect x="45" y="65" width="180" height="150" rx="18" fill="#dcfce7" stroke="#22c55e"/><text x="135" y="100" text-anchor="middle" font-size="17" font-weight="700">Primera muestra</text><text x="135" y="135" text-anchor="middle" font-size="28" font-weight="700" fill="#15803d">8</text><text x="135" y="165" text-anchor="middle" font-size="15">capturadas y marcadas</text></g><g><rect x="295" y="65" width="180" height="150" rx="18" fill="#dbeafe" stroke="#3b82f6"/><text x="385" y="100" text-anchor="middle" font-size="17" font-weight="700">Segunda muestra</text><text x="385" y="132" text-anchor="middle" font-size="26" font-weight="700" fill="#1d4ed8">12</text><text x="385" y="158" text-anchor="middle" font-size="15">capturadas</text><text x="385" y="184" text-anchor="middle" font-size="15">2 marcadas</text></g><line x1="225" y1="140" x2="295" y2="140" stroke="#64748b" stroke-width="3" stroke-dasharray="8 8"/><text x="260" y="130" text-anchor="middle" font-size="14" fill="#475569">15 días</text></svg>`,
+    lincolnFish:`<svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="280" rx="18" fill="#f8fbff"/><text x="30" y="32" font-size="18" font-weight="700">Método de Lincoln: peces</text><g><rect x="45" y="65" width="180" height="150" rx="18" fill="#dcfce7" stroke="#22c55e"/><text x="135" y="100" text-anchor="middle" font-size="17" font-weight="700">Primera muestra</text><text x="135" y="135" text-anchor="middle" font-size="28" font-weight="700" fill="#15803d">645</text><text x="135" y="165" text-anchor="middle" font-size="15">marcados</text></g><g><rect x="295" y="65" width="180" height="150" rx="18" fill="#dbeafe" stroke="#3b82f6"/><text x="385" y="100" text-anchor="middle" font-size="17" font-weight="700">Segunda muestra</text><text x="385" y="130" text-anchor="middle" font-size="24" font-weight="700" fill="#1d4ed8">84</text><text x="385" y="150" text-anchor="middle" font-size="14">marcados</text><text x="385" y="182" text-anchor="middle" font-size="24" font-weight="700" fill="#1d4ed8">482</text><text x="385" y="202" text-anchor="middle" font-size="14">sin marcar</text></g></svg>`,
+    simpsonForest:makeSvgTable(['Especie','Ecosistema A','Ecosistema B'],[['Pino de Weymouth','84','50'],['Arce rojo','16','50']],'Abundancia en dos bosques'),
+    riverTable:makeSvgTable(['Especie','Río A','Río B'],[['Ninfa de efímera','4','0'],['Larva de frigánea','30','0'],['Camarón de agua dulce','70','1'],['Isópodo de agua dulce','34','4'],['Gusano de sangre','10','45'],['Gusano del lodo','2','100']],'Muestreo de dos ríos'),
+    densityTable:makeSvgTable(['País','Población','Superficie (km²)'],[['Hungría','9 900 000','93 033'],['España','39 900 000','504 783'],['China','1 294 400 000','9 572 900'],['EE.UU.','288 500 000','9 529 063'],['Singapur','4 200 000','618']],'Densidad de población'),
+    natMortTable:makeSvgTable(['País','Población','Nacimientos','Defunciones'],[['A','8 800 000','106 000','106 000'],['B','127 500 000','1 254 000','1 003 600'],['C','6 700 000','190 500','33 630']],'Datos demográficos'),
+    birthDeathGlobal:makeSvgTable(['Año','TBN por 1000','TBM por 1000'],[['2003','20.43','8.83'],['2004','20.24','8.86'],['2005','20.15','8.78'],['2006','20.05','8.67'],['2007','20.09','8.37'],['2008','20.18','8.23'],['2009','19.86','8.57'],['2010','19.56','8.20'],['2011','19.15','8.12']],'Natalidad y mortalidad global'),
+    continentsTable:makeSvgTable(['Continente','Nacidos','Fallecidos','Población'],[['África','32 754 000','12 105 000','865 000 000'],['Asia','76 657 000','26 900 000','3 850 000 000'],['Europa','7 300 000','8 750 000','740 000 000'],['Oceanía','580 000','230 000','33 000 000'],['América del Norte','4 525 000','2 630 000','325 000 000'],['América del Sur','12 450 000','3 250 000','550 000 000']],'Continentes'),
+    sevillaCard:`<svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="300" rx="18" fill="#f8fbff"/><text x="25" y="35" font-size="18" font-weight="700">Datos de Sevilla</text><g font-size="16" fill="#334155"><text x="35" y="85">Nacidos vivos: 7432</text><text x="35" y="120">Muertes menores de 1 año: 39</text><text x="35" y="155">Muertes totales: 5821</text><text x="35" y="190">Población total: 684 633</text></g><rect x="300" y="70" width="180" height="145" rx="18" fill="#eff6ff" stroke="#60a5fa"/><text x="390" y="105" text-anchor="middle" font-size="16" font-weight="700" fill="#1d4ed8">Recuerda</text><text x="390" y="135" text-anchor="middle" font-size="14">TBM general:</text><text x="390" y="155" text-anchor="middle" font-size="14">muertes / población</text><text x="390" y="180" text-anchor="middle" font-size="14">TBM infantil:</text><text x="390" y="200" text-anchor="middle" font-size="14">muertes &lt;1 / nacidos vivos</text></svg>`,
+    doublingCosta:`<svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="280" rx="18" fill="#f8fbff"/><rect x="40" y="55" width="190" height="160" rx="18" fill="#dcfce7" stroke="#22c55e"/><text x="135" y="95" text-anchor="middle" font-size="16" font-weight="700">Tasa de crecimiento natural</text><text x="135" y="155" text-anchor="middle" font-size="36" font-weight="700" fill="#15803d">1.05 %</text><rect x="290" y="55" width="190" height="160" rx="18" fill="#dbeafe" stroke="#3b82f6"/><text x="385" y="95" text-anchor="middle" font-size="16" font-weight="700">Fórmula</text><text x="385" y="155" text-anchor="middle" font-size="34" font-weight="700" fill="#1d4ed8">70 / 1.05</text></svg>`,
+    worldPopulation:areaPopulationGraphic(),
+    animalFamilies:lineFamiliesGraphic(),
+    lakePhLead:dualLineGraphic(),
+    islandSpecies:islandSpeciesGraphic(),
+    energyMix:stackedEnergyGraphic(),
+    fishingPolicy:fishingPolicyGraphic(),
+    waterUse:waterUseGraphic(),
+    beijingElectricity:beijingTableGraphic(),
+    infiltration:infiltrationGraphic(),
+    waterDemand:waterDemandGraphic(),
+    dichoOrganisms:dichoGraphic(),
+    insectCounts:insectCountsGraphic()
+  };
+  return g[name] || '<div>Sin gráfico</div>';
+}
+
+function makeSvgTable(headers, rows, title){
+  const colW=150; const W=30+headers.length*colW; const rowH=36; const H=80+(rows.length+1)*rowH;
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" rx="18" fill="#f8fbff"/><text x="24" y="28" font-size="18" font-weight="700" fill="#0f172a">${title}</text><g transform="translate(20,46)">`;
+  headers.forEach((h,i)=>{ s += `<rect x="${i*colW}" y="0" width="${colW}" height="${rowH}" fill="#dbeafe" stroke="#93c5fd"/><text x="${i*colW+colW/2}" y="23" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a8a">${h}</text>`; });
+  rows.forEach((r,j)=>{ r.forEach((c,i)=>{ s += `<rect x="${i*colW}" y="${(j+1)*rowH}" width="${colW}" height="${rowH}" fill="white" stroke="#cbd5e1"/><text x="${i*colW+colW/2}" y="${(j+1)*rowH+23}" text-anchor="middle" font-size="13" fill="#334155">${c}</text>`; }); });
+  s += '</g></svg>'; return s;
+}
+
+function areaPopulationGraphic(){
+  return `<svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="300" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Población mundial proyectada por regiones</text><rect x="50" y="40" width="430" height="220" fill="white" stroke="#cbd5e1"/><g stroke="#e5e7eb">${[0,1,2,3,4,5,6].map(i=>`<line x1="50" y1="${60+i*28}" x2="480" y2="${60+i*28}"/>`).join('')}</g><path d="M50 230 L100 170 L150 145 L200 135 L250 126 L300 119 L350 110 L400 106 L450 102 L480 100 L480 260 L50 260 Z" fill="#cbd5e1" opacity=".85"/><path d="M50 230 L100 190 L150 175 L200 172 L250 170 L300 167 L350 162 L400 158 L450 156 L480 154 L480 260 L50 260 Z" fill="#fde68a" opacity=".85"/><path d="M50 230 L100 205 L150 198 L200 197 L250 194 L300 190 L350 184 L400 178 L450 176 L480 174 L480 260 L50 260 Z" fill="#86efac" opacity=".85"/><path d="M50 230 L100 215 L150 210 L200 208 L250 205 L300 202 L350 200 L400 198 L450 197 L480 196 L480 260 L50 260 Z" fill="#93c5fd" opacity=".92"/><g font-size="12" fill="#475569">${['1950','1975','2000','2025','2050','2075','2100','2125','2150'].map((y,i)=>`<text x="${50+i*53.75}" y="278">${y}</text>`).join('')}<text x="11" y="64">12</text><text x="15" y="120">8</text><text x="15" y="176">4</text></g><g font-size="12" font-weight="700"><text x="390" y="95" fill="#374151">Total mundial</text><text x="390" y="150" fill="#a16207">África</text><text x="390" y="172" fill="#166534">Otras regiones</text><text x="390" y="194" fill="#1d4ed8">Europa/América</text></g></svg>`;
+}
+function lineFamiliesGraphic(){
+  return `<svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="300" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Familias animales a lo largo del tiempo geológico</text><rect x="55" y="40" width="420" height="220" fill="white" stroke="#cbd5e1"/><polyline fill="none" stroke="#334155" stroke-width="3" points="55,245 80,240 100,225 120,220 140,170 160,150 180,175 200,152 220,160 240,155 260,158 280,154 300,220 320,205 340,180 360,160 380,145 400,130 420,100 440,90 455,70"/><g font-size="12" fill="#475569"><text x="52" y="278">600</text><text x="135" y="278">500</text><text x="220" y="278">400</text><text x="305" y="278">300</text><text x="390" y="278">200</text><text x="455" y="278">0</text><text x="18" y="252">0</text><text x="12" y="180">300</text><text x="12" y="105">600</text></g></svg>`;
+}
+function dualLineGraphic(){
+  return `<svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="300" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">pH y plomo en un lago</text><rect x="55" y="40" width="410" height="220" fill="white" stroke="#cbd5e1"/><polyline fill="none" stroke="#ef4444" stroke-width="3" points="70,220 130,205 190,175 250,145 310,130 370,110 430,102"/><polyline fill="none" stroke="#2563eb" stroke-width="3" points="70,72 130,84 190,102 250,155 310,170 370,176 430,182"/><g font-size="12" fill="#475569"><text x="65" y="278">1970</text><text x="123" y="278">1975</text><text x="183" y="278">1980</text><text x="243" y="278">1985</text><text x="303" y="278">1990</text><text x="363" y="278">1995</text><text x="423" y="278">2000</text><text x="10" y="72">600</text><text x="14" y="144">300</text><text x="18" y="220">0</text><text x="475" y="74">7</text><text x="475" y="145">5</text><text x="475" y="220">3</text></g><text x="80" y="62" fill="#2563eb" font-weight="700">Plomo</text><text x="384" y="96" fill="#ef4444" font-weight="700">pH</text></svg>`;
+}
+function islandSpeciesGraphic(){
+  return `<svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="300" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Área de isla y número de especies</text><rect x="55" y="40" width="410" height="220" fill="white" stroke="#cbd5e1"/><polyline fill="none" stroke="#111827" stroke-width="2.5" points="70,235 95,205 120,175 145,150 190,115 240,88 320,60 450,40"/><g fill="#111827">${[[70,235],[95,205],[120,175],[145,150],[190,115],[240,88],[320,60],[450,40]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="4"/>`).join('')}</g><g font-size="12" fill="#475569"><text x="64" y="278">0</text><text x="104" y="278">1</text><text x="154" y="278">2</text><text x="204" y="278">3</text><text x="254" y="278">4</text><text x="304" y="278">5</text><text x="354" y="278">6</text><text x="404" y="278">8</text><text x="454" y="278">10</text><text x="16" y="238">0</text><text x="10" y="190">40</text><text x="10" y="145">80</text><text x="4" y="95">120</text></g></svg>`;
+}
+function stackedEnergyGraphic(){
+  return `<svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="320" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Cambios en fuentes de energía</text><rect x="55" y="40" width="410" height="240" fill="white" stroke="#cbd5e1"/>
+      ${energyBar(90,[90,8,0,0,2])}${energyBar(180,[75,15,0,8,2])}${energyBar(270,[35,30,35,20,10])}${energyBar(360,[25,35,25,15,15])}
+      <g font-size="12" fill="#475569"><text x="95" y="298">1940</text><text x="185" y="298">1960</text><text x="275" y="298">1980</text><text x="365" y="298">2000</text></g>
+      <g font-size="12" font-weight="700"><rect x="410" y="70" width="14" height="14" fill="#9ca3af"/><text x="430" y="82">Carbón</text><rect x="410" y="95" width="14" height="14" fill="#f59e0b"/><text x="430" y="107">Petróleo</text><rect x="410" y="120" width="14" height="14" fill="#84cc16"/><text x="430" y="132">Gas</text><rect x="410" y="145" width="14" height="14" fill="#60a5fa"/><text x="430" y="157">Nuclear</text><rect x="410" y="170" width="14" height="14" fill="#34d399"/><text x="430" y="182">Renovable</text></g></svg>`;
+}
+function energyBar(x, parts){
+  const colors=['#9ca3af','#f59e0b','#84cc16','#60a5fa','#34d399']; let y=260; let out='';
+  parts.forEach((p,i)=>{ const h=p*2; y-=h; out += `<rect x="${x}" y="${y}" width="48" height="${h}" fill="${colors[i]}" stroke="white"/>`; });
+  return out;
+}
+function fishingPolicyGraphic(){
+  return `<svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="320" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Políticas pesqueras</text><text x="110" y="50" font-size="15" font-weight="700">Alta intensidad</text><text x="330" y="50" font-size="15" font-weight="700">Baja intensidad</text><rect x="40" y="60" width="180" height="220" fill="white" stroke="#cbd5e1"/><rect x="290" y="60" width="180" height="220" fill="white" stroke="#cbd5e1"/>${policyBars(70,[20,18],[0,0])}${policyBars(110,[32,28],[0,0])}${policyBars(150,[36,36],[0,0])}${policyBars(190,[48,24],[0,0])}${policyBars(320,[20,6],[0,0])}${policyBars(360,[36,16],[0,0])}${policyBars(400,[120,36],[0,0])}${policyBars(440,[168,48],[0,0])}<g font-size="11" fill="#475569"><text x="76" y="295">1</text><text x="116" y="295">2</text><text x="156" y="295">3</text><text x="196" y="295">4</text><text x="326" y="295">1</text><text x="366" y="295">2</text><text x="406" y="295">3</text><text x="446" y="295">4</text></g><rect x="215" y="80" width="12" height="12" fill="#d1d5db"/><text x="232" y="90" font-size="12">captura</text><rect x="215" y="100" width="12" height="12" fill="#fff" stroke="#94a3b8"/><text x="232" y="110" font-size="12">stock</text></svg>`;
+}
+function policyBars(x, vals){ const stock=vals[0], catchv=vals[1]; return `<rect x="${x}" y="${260-stock}" width="24" height="${stock}" fill="#fff" stroke="#94a3b8"/><rect x="${x}" y="${260-stock-catchv}" width="24" height="${catchv}" fill="#d1d5db" stroke="#94a3b8"/><text x="${x+12}" y="${260-stock+18}" text-anchor="middle" font-size="10">${stock}</text><text x="${x+12}" y="${260-stock-catchv+14}" text-anchor="middle" font-size="10">${catchv}</text>`; }
+function waterUseGraphic(){
+  const vals=[1050,818,664,454,227], years=[1990,2010,2015,2020,2030];
+  let bars=''; vals.forEach((v,i)=>{ const h=v/5; bars += `<rect x="${90+i*70}" y="${260-h}" width="40" height="${h}" fill="${i<4?'#38bdf8':'#e5e7eb'}" stroke="#0ea5e9"/><text x="${110+i*70}" y="${255-h}" text-anchor="middle" font-size="11">${v}</text><text x="${108+i*70}" y="285" text-anchor="middle" font-size="11">${years[i]}</text>`; });
+  return `<svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="320" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Consumo medio diario de agua por persona</text><rect x="55" y="40" width="410" height="240" fill="white" stroke="#cbd5e1"/>${bars}<text x="13" y="70" font-size="11">1200</text><text x="20" y="165" font-size="11">600</text><text x="26" y="262" font-size="11">0</text></svg>`;
+}
+function beijingTableGraphic(){
+  return makeSvgTable(['Año','Consumo (kWh bn)'],[['2019','117.020'],['2018','114.351'],['2017','107.002'],['2016','101.998'],['2015','94.982'],['2014','92.884'],['2013','90.655'],['2012','90.954'],['2011','84.893'],['2010','82.794'],['2009','76.016'],['2008','71.195']],'Consumo eléctrico de Beijing');
+}
+function infiltrationGraphic(){
+  return `<svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="320" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Transferencias de agua: bosque vs urbano</text><rect x="40" y="60" width="190" height="220" rx="16" fill="#ecfdf5" stroke="#86efac"/><rect x="290" y="60" width="190" height="220" rx="16" fill="#eff6ff" stroke="#93c5fd"/><text x="135" y="86" text-anchor="middle" font-size="16" font-weight="700">Ambiente forestal</text><text x="385" y="86" text-anchor="middle" font-size="16" font-weight="700">Ambiente urbano</text><g font-size="15" fill="#334155"><text x="74" y="135">40% evapotranspiración</text><text x="74" y="170">10% escorrentía</text><text x="74" y="205">25% infiltración superficial</text><text x="74" y="240">25% infiltración profunda</text><text x="324" y="135">30% evapotranspiración</text><text x="324" y="170">55% escorrentía</text><text x="324" y="205">10% infiltración superficial</text><text x="324" y="240">5% infiltración profunda</text></g></svg>`;
+}
+function waterDemandGraphic(){
+  return `<svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="320" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Demanda global de agua por sector</text><rect x="55" y="40" width="410" height="240" fill="white" stroke="#cbd5e1"/>${stackBarWD(120,[2400,800,300,500])}${stackBarWD(230,[2500,950,300,500])}${stackBarWD(340,[2900,800,350,450])}<g font-size="12"><text x="125" y="296">2014</text><text x="235" y="296">2025</text><text x="345" y="296">2040</text></g><g font-size="12" font-weight="700"><rect x="390" y="72" width="12" height="12" fill="#86efac"/><text x="408" y="82">Agricultura</text><rect x="390" y="95" width="12" height="12" fill="#7dd3fc"/><text x="408" y="105">Doméstico</text><rect x="390" y="118" width="12" height="12" fill="#ef4444"/><text x="408" y="128">Industria</text><rect x="390" y="141" width="12" height="12" fill="#fde047"/><text x="408" y="151">Energía</text></g></svg>`;
+}
+function stackBarWD(x,vals){ const colors=['#86efac','#7dd3fc','#ef4444','#fde047']; let y=260, out=''; vals.forEach((v,i)=>{ const h=v/20; y-=h; out += `<rect x="${x}" y="${y}" width="42" height="${h}" fill="${colors[i]}" stroke="#fff"/>`; }); return out; }
+function dichoGraphic(){
+  return `<svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="300" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Organismos para clave dicotómica</text><g stroke="#111827" stroke-width="2" fill="none"><circle cx="80" cy="120" r="18"/><line x1="80" y1="102" x2="80" y2="84"/><line x1="68" y1="136" x2="54" y2="150"/><line x1="92" y1="136" x2="106" y2="150"/><line x1="68" y1="104" x2="54" y2="94"/><line x1="92" y1="104" x2="106" y2="94"/></g><text x="55" y="180" font-size="12">A</text><g stroke="#111827" stroke-width="2" fill="none"><ellipse cx="180" cy="120" rx="26" ry="18"/><line x1="154" y1="120" x2="130" y2="120"/><line x1="206" y1="120" x2="230" y2="120"/><line x1="180" y1="102" x2="180" y2="78"/></g><text x="176" y="180" font-size="12">B</text><g stroke="#111827" stroke-width="2" fill="none"><path d="M285 100 q25 20 0 40 q-25 -20 0 -40z"/><line x1="285" y1="100" x2="260" y2="76"/><line x1="285" y1="140" x2="260" y2="164"/></g><text x="280" y="180" font-size="12">C</text><g stroke="#111827" stroke-width="2" fill="none"><rect x="360" y="100" width="45" height="40" rx="12"/><line x1="360" y1="110" x2="340" y2="95"/><line x1="405" y1="110" x2="425" y2="95"/></g><text x="380" y="180" font-size="12">D</text><g stroke="#111827" stroke-width="2" fill="none"><path d="M80 240 q30 -30 60 0"/><path d="M80 240 q30 30 60 0"/></g><text x="106" y="272" font-size="12">E</text></svg>`;
+}
+function insectCountsGraphic(){
+  return `<svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg"><rect width="520" height="300" rx="18" fill="#f8fbff"/><text x="20" y="24" font-size="18" font-weight="700">Abundancias de insectos</text><g font-size="16" font-weight="700" fill="#111827"><text x="70" y="110">A = 5</text><text x="160" y="110">B = 2</text><text x="250" y="110">C = 8</text><text x="340" y="110">D = 3</text><text x="430" y="110">E = 22</text></g><g fill="#dbeafe" stroke="#60a5fa">${[5,2,8,3,22].map((v,i)=>`<rect x="${60+i*90}" y="${245-v*6}" width="48" height="${v*6}"/>`).join('')}</g><g font-size="12">${['A','B','C','D','E'].map((v,i)=>`<text x="${84+i*90}" y="266" text-anchor="middle">${v}</text>`).join('')}</g></svg>`;
+}
+
+function render(){
+  injectClimos();
+  injectExerciseSection(productivityCards,'prodGrid','Productividad');
+  injectExerciseSection(biodiversityCards,'bioGrid','Biodiversidad');
+  injectExerciseSection(populationCards,'popGrid','Población');
+  injectExerciseSection(graphCards,'graphGrid','Interpretación gráfica');
+  bindSave();
+  loadState();
+  updateProgress();
+}
+
+function bindSave(){
+  document.querySelectorAll('[data-save="true"]').forEach(el=>{
+    el.addEventListener('input', saveState);
+    el.addEventListener('change', saveState);
+  });
+}
+function getFields(){ return [...document.querySelectorAll('[data-save="true"]')]; }
+function saveState(){
+  const data=getFields().map(el=>({type:el.type||el.tagName.toLowerCase(), value:el.type==='checkbox'?el.checked:el.value}));
+  localStorage.setItem(storeKey, JSON.stringify(data));
+  updateProgress();
+}
+function loadState(){
+  const raw=localStorage.getItem(storeKey); if(!raw) return;
+  try{ const data=JSON.parse(raw); getFields().forEach((el,i)=>{ if(!data[i]) return; if(el.type==='checkbox') el.checked=!!data[i].value; else el.value=data[i].value||''; }); }catch(e){ console.warn(e); }
+}
+function updateProgress(){
+  const boxes=[...document.querySelectorAll('input[type="checkbox"][data-save="true"]')];
+  const done=boxes.filter(b=>b.checked).length;
+  const pct=boxes.length?Math.round(done/boxes.length*100):0;
+  document.getElementById('doneCount').textContent=done;
+  document.getElementById('progressText').textContent = `${pct} % (${done} de ${boxes.length} actividades marcadas)`;
+  document.getElementById('progressFill').style.width = pct+'%';
+}
+function resetProgress(){
+  if(!confirm('¿Deseas borrar el progreso guardado en este navegador?')) return;
+  localStorage.removeItem(storeKey);
+  getFields().forEach(el=>{ if(el.type==='checkbox') el.checked=false; else el.value=''; el.style.borderColor='#cdd5df'; });
+  document.querySelectorAll('.status').forEach(x=>x.textContent='');
+  updateProgress();
+}
+function downloadReport(){
+  const lines=['AULA INTERACTIVA SAS NM – INFORME DE TRABAJO','Fecha: '+new Date().toLocaleString(),''];
+  getFields().forEach(el=>{
+    const label=el.dataset.reportLabel||'Campo'; const val=el.type==='checkbox'?(el.checked?'Sí':'No'):(el.value||'').trim();
+    if(val!=='' && val!=='No'){ lines.push(label+':'); lines.push(String(val)); lines.push(''); }
+  });
+  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Informe_Aula_SAS.txt'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+
+function bindZoom(){
+  document.querySelectorAll('.zoomable').forEach(box=>{
+    box.addEventListener('click',e=>{
+      if(e.target.closest('button')) return;
+      openZoomModal(box);
+    });
+  });
+}
+function openZoomModal(source){
+  const modal=document.getElementById('zoomModal');
+  const stage=document.getElementById('zoomStage');
+  stage.innerHTML='';
+  const canvas=source.querySelector('canvas');
+  const svg=source.querySelector('svg');
+  if(canvas){
+    const clone=document.createElement('canvas');
+    clone.width=canvas.width*1.6; clone.height=canvas.height*1.6;
+    clone.style.maxWidth='none';
+    const ctx=clone.getContext('2d');
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,clone.width,clone.height);
+    ctx.drawImage(canvas,0,0,clone.width,clone.height);
+    stage.appendChild(clone);
+  } else if(svg){
+    const clone=svg.cloneNode(true);
+    const vb=svg.getAttribute('viewBox');
+    if(vb){
+      const parts=vb.split(/\s+/).map(Number);
+      if(parts.length===4){
+        clone.style.width=Math.max(parts[2]*1.9,900)+'px';
+      }
+    } else {
+      clone.style.width='1200px';
+    }
+    clone.style.maxWidth='none';
+    stage.appendChild(clone);
+  }
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+}
+function closeZoomModal(){
+  const modal=document.getElementById('zoomModal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{ render(); bindZoom(); document.getElementById('zoomModal').addEventListener('click',e=>{ if(e.target.id==='zoomModal') closeZoomModal(); }); document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeZoomModal(); }); });
+</script>
+
+<div id="zoomModal" class="zoom-modal print-hide" aria-hidden="true">
+  <div class="zoom-inner">
+    <div class="zoom-toolbar">
+      <strong>Vista ampliada del gráfico</strong>
+      <button class="zoom-close" onclick="closeZoomModal()">Cerrar</button>
+    </div>
+    <div id="zoomStage" class="zoom-stage"></div>
+  </div>
+</div>
+
+</body>
+</html>
